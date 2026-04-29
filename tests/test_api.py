@@ -120,3 +120,20 @@ def test_stats_endpoint(client):
     assert data["overall_accuracy"] == 50
     assert len(data["wrong_top"]) == 1
     assert data["wrong_top"][0]["a"] == 17
+
+
+def test_static_files_have_no_cache_header(client):
+    """Mobile Chrome was caching stale JS, breaking incremental fixes.
+    Every static asset must say no-store so browsers always re-fetch."""
+    r = client.get("/js/api.js")
+    assert r.status_code == 200
+    assert "no-store" in r.headers.get("cache-control", "")
+
+
+def test_games_static_directory_is_mounted(client):
+    """/games/<id>/* must serve from frontend/games/."""
+    # We don't have games/ files yet; this test will be enabled when
+    # Task 3 creates frontend/games/cou-shi/game.js. For now, check
+    # the mount returns 404 (not 500).
+    r = client.get("/games/nope/missing.js")
+    assert r.status_code == 404

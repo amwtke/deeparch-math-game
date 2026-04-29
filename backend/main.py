@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import db
 from .api import router as api_router
+from .static_no_cache import NoCacheStaticFiles
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -53,6 +54,8 @@ def dashboard():
     return FileResponse(FRONTEND_DIR / "dashboard.html")
 
 
-# 静态资源 (CSS / JS)。注意挂在最后,/css/* 和 /js/* 走这里
-app.mount("/css", StaticFiles(directory=FRONTEND_DIR / "css"), name="css")
-app.mount("/js", StaticFiles(directory=FRONTEND_DIR / "js"), name="js")
+# 静态资源 (CSS / JS / 游戏)。挂在最后,/css/* /js/* /games/* 走这里。
+# NoCacheStaticFiles 加 Cache-Control: no-store,避免移动端缓存老 JS。
+app.mount("/css", NoCacheStaticFiles(directory=FRONTEND_DIR / "css"), name="css")
+app.mount("/js", NoCacheStaticFiles(directory=FRONTEND_DIR / "js"), name="js")
+app.mount("/games", NoCacheStaticFiles(directory=FRONTEND_DIR / "games"), name="games")
