@@ -421,12 +421,6 @@ window.CouShi = {
     };
     document.addEventListener('click', unlock, { once: true });
     listenerCleanups.push(() => document.removeEventListener('click', unlock));
-    // 触摸:阻止按钮的 touchend 默认行为
-    const touchHandler = (e) => {
-      if (e.target.tagName === 'BUTTON') e.preventDefault();
-    };
-    document.addEventListener('touchend', touchHandler, { passive: false });
-    listenerCleanups.push(() => document.removeEventListener('touchend', touchHandler));
     // 渲染主菜单
     render('menu');
   },
