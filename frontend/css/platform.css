@@ -1,0 +1,105 @@
+/* === 平台首页 === */
+.platform-screen {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.platform-home {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.platform-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 24px;
+  color: white;
+  text-shadow: 3px 3px 0 var(--dirt-dark);
+  margin: 16px 0 8px;
+  letter-spacing: 2px;
+}
+.platform-subtitle {
+  font-size: 16px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 6px 16px;
+  border: 3px solid var(--dirt-dark);
+  margin-bottom: 24px;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+.game-card {
+  aspect-ratio: 1;
+  background: var(--grass);
+  border-top: 4px solid var(--grass-light);
+  border-left: 4px solid var(--grass-light);
+  border-right: 4px solid var(--grass-dark);
+  border-bottom: 4px solid var(--grass-dark);
+  color: white;
+  text-shadow: 2px 2px 0 var(--grass-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s;
+  padding: 8px;
+}
+.game-card:not(.locked):active {
+  transform: translate(2px, 2px);
+}
+.game-card.gray, .game-card.locked {
+  background: var(--stone);
+  border-top-color: #BDBDBD;
+  border-left-color: #BDBDBD;
+  border-right-color: var(--stone-dark);
+  border-bottom-color: var(--stone-dark);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.game-card-icon {
+  font-size: 36px;
+  margin-bottom: 6px;
+}
+.game-card-name {
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.parent-link {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border: 2px dashed white;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* === 游戏挂载点 === */
+.platform-screen.hidden { display: none; }
+.game-host {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+.game-host.active {
+  display: flex;
+}
+.game-host > .screen {
+  flex: 1;
+}
