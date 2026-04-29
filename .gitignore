@@ -20,3 +20,4 @@ data/*.db-journal
 .pytest_cache/
 .coverage
 htmlcov/
+.superpowers/
