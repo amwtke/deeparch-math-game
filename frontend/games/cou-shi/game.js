@@ -385,44 +385,14 @@ function showFeedback(correct, result) {
 function showHint() {
   if (hintShown) return;
   hintShown = true;
-
-  const q = currentQuestion;
-  const aOnes = q.a % 10;
-  const bOnes = q.b % 10;
-  const need = 10 - aOnes;
-  const remaining = bOnes - need;
-  const newTens = Math.floor(q.a / 10) + Math.floor(q.b / 10) + 1;
-
-  const overlay = el('div', { class: 'feedback-overlay show' });
-  const card = el('div', { class: 'feedback-card', style: 'border-color:var(--gold-dark);' });
-  card.appendChild(el('div', { class: 'feedback-icon' }, '💡'));
-  card.appendChild(el('div', { class: 'feedback-title', style: 'color:var(--gold-dark);' },
-    '凑十秘籍'));
-
-  const detail = el('div', {
-    style: 'text-align:left;font-size:18px;line-height:1.8;color:var(--text);margin-top:8px;',
-  });
-  detail.innerHTML =
-    '① 看 <b>' + aOnes + '</b> 差几凑10? <b style="color:var(--redstone);">差 ' + need + '</b><br>' +
-    '② 从 <b>' + bOnes + '</b> 借 <b style="color:var(--redstone);">' + need + '</b> 个 → 还剩 <b>' + remaining + '</b><br>' +
-    '③ 多了一条长方块! 现在有 <b style="color:var(--diamond-dark);">' + newTens + '</b> 条<br>' +
-    '④ ' + (newTens * 10) + ' + ' + remaining + ' = ?';
-  card.appendChild(detail);
-
-  const overlayCleanup = () => overlay.remove();
-  listenerCleanups.push(overlayCleanup);
-  card.appendChild(el('button', {
-    class: 'menu-btn',
-    style: 'margin-top:16px;font-size:16px;padding:8px 24px;',
-    onclick: () => {
-      overlay.remove();
-      const idx = listenerCleanups.indexOf(overlayCleanup);
-      if (idx >= 0) listenerCleanups.splice(idx, 1);
+  Drag.openFurnace({
+    a: currentQuestion.a,
+    b: currentQuestion.b,
+    onClose: () => {
+      // 关掉模态后,孩子继续在键盘填答案;hintShown=true 已记录,
+      // 提交答案时通过 used_hint 字段告诉后端。
     },
-  }, '我懂了!'));
-
-  overlay.appendChild(card);
-  document.body.appendChild(overlay);
+  });
 }
 
 // ============== 模块入口 ==============
