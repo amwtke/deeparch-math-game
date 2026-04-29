@@ -299,7 +299,7 @@ html, body {
   padding: 2px;
   border: 2px solid black;
   margin: 2px;
-  position: relative;  /* NEW: anchor for .bar-label */
+  position: relative;
 }
 .bar-block.red { background: var(--redstone-dark); }
 .bar-block.diamond {
@@ -331,7 +331,7 @@ html, body {
   border-right: 2px solid var(--grass-dark);
   border-bottom: 3px solid var(--grass-dark);
   margin: 1px;
-  position: relative;  /* NEW: anchor for .cube-label */
+  position: relative;
 }
 .single-cube.red {
   background: var(--redstone);
@@ -650,7 +650,7 @@ html, body {
   font-family: 'Press Start 2P', monospace;
   font-size: 9px;
   color: white;
-  text-shadow: 1px 1px 0 black;
+  text-shadow: 1px 1px 0 black, -1px -1px 0 black;
   pointer-events: none;
 }
 .bar-label {
