@@ -1,4 +1,4 @@
-/* === 凑十大冒险 - 像素风样式 === */
+/* === 游戏平台 - 共享像素风样式 === */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=ZCOOL+KuaiLe&display=swap');
 
 * {
@@ -115,30 +115,6 @@ html, body {
   gap: 12px;
 }
 
-/* === 主菜单 === */
-.menu-screen {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.game-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 28px;
-  color: white;
-  text-shadow: 3px 3px 0 var(--dirt-dark), 6px 6px 0 rgba(0, 0, 0, 0.3);
-  margin-bottom: 8px;
-  line-height: 1.4;
-  letter-spacing: 2px;
-}
-.game-subtitle {
-  font-size: 18px;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 6px 16px;
-  border: 3px solid var(--dirt-dark);
-  margin-bottom: 24px;
-}
-
 /* === 按钮 === */
 .menu-btn {
   font-family: 'ZCOOL KuaiLe', sans-serif;
@@ -182,32 +158,6 @@ html, body {
   text-shadow: 2px 2px 0 var(--diamond-dark);
 }
 
-/* === 史蒂夫像素头像 === */
-.steve-avatar {
-  width: 64px;
-  height: 64px;
-  margin: 16px auto;
-  background:
-    linear-gradient(to bottom,
-      transparent 0%, transparent 12%,
-      #6D4C41 12%, #6D4C41 35%,
-      #F5DEB3 35%, #F5DEB3 75%,
-      #2196F3 75%);
-  border: 3px solid var(--dirt-dark);
-  image-rendering: pixelated;
-  position: relative;
-}
-.steve-avatar::before, .steve-avatar::after {
-  content: '';
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: white;
-  top: 42%;
-}
-.steve-avatar::before { left: 22%; }
-.steve-avatar::after { right: 22%; }
-
 /* === 进度条 === */
 .progress-bar {
   background: rgba(0, 0, 0, 0.5);
@@ -233,65 +183,6 @@ html, body {
   text-shadow: 1px 1px 0 black;
 }
 
-/* === 游戏题目卡片 === */
-.equation-card {
-  background: rgba(255, 255, 255, 0.95);
-  border: 4px solid var(--dirt-dark);
-  padding: 16px;
-  text-align: center;
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
-}
-.equation {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 32px;
-  color: var(--text);
-  letter-spacing: 4px;
-  margin: 8px 0;
-}
-.equation .qmark {
-  color: var(--redstone);
-  animation: pulse 1s infinite;
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-}
-
-/* === 方块世界 === */
-.block-world {
-  background: rgba(135, 206, 235, 0.4);
-  border: 4px solid var(--dirt-dark);
-  padding: 12px;
-  min-height: 180px;
-  display: flex;
-  justify-content: space-around;
-  gap: 12px;
-  position: relative;
-}
-.block-zone {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.zone-label {
-  font-size: 16px;
-  color: white;
-  background: var(--dirt-dark);
-  padding: 4px 8px;
-  border: 2px solid black;
-}
-.blocks-area {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 4px;
-  min-height: 120px;
-  padding: 4px;
-}
-
 /* 长条方块 (1个十) */
 .bar-block {
   display: inline-flex;
@@ -299,6 +190,7 @@ html, body {
   padding: 2px;
   border: 2px solid black;
   margin: 2px;
+  position: relative;
 }
 .bar-block.red { background: var(--redstone-dark); }
 .bar-block.diamond {
@@ -330,77 +222,13 @@ html, body {
   border-right: 2px solid var(--grass-dark);
   border-bottom: 3px solid var(--grass-dark);
   margin: 1px;
+  position: relative;
 }
 .single-cube.red {
   background: var(--redstone);
   border-top-color: #FFCDD2;
   border-right-color: var(--redstone-dark);
   border-bottom-color: var(--redstone-dark);
-}
-
-/* === 数字键盘 === */
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 8px;
-}
-.keypad-btn {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 22px;
-  padding: 18px 0;
-  background: var(--stone);
-  color: white;
-  border: none;
-  border-top: 4px solid #BDBDBD;
-  border-left: 4px solid #BDBDBD;
-  border-right: 4px solid var(--stone-dark);
-  border-bottom: 4px solid var(--stone-dark);
-  cursor: pointer;
-  text-shadow: 2px 2px 0 var(--stone-dark);
-  transition: transform 0.05s;
-}
-.keypad-btn:active {
-  transform: translate(2px, 2px);
-  border-top-color: var(--stone-dark);
-  border-left-color: var(--stone-dark);
-  border-right-color: #BDBDBD;
-  border-bottom-color: #BDBDBD;
-}
-.keypad-btn.delete {
-  background: var(--redstone);
-  border-top-color: #EF9A9A;
-  border-left-color: #EF9A9A;
-  border-right-color: var(--redstone-dark);
-  border-bottom-color: var(--redstone-dark);
-}
-.keypad-btn.submit {
-  background: var(--grass);
-  border-top-color: var(--grass-light);
-  border-left-color: var(--grass-light);
-  border-right-color: var(--grass-dark);
-  border-bottom-color: var(--grass-dark);
-}
-
-/* === 答案显示 === */
-.answer-display {
-  background: black;
-  color: var(--gold);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 28px;
-  padding: 12px;
-  text-align: center;
-  border: 4px solid var(--dirt-dark);
-  min-height: 56px;
-  letter-spacing: 8px;
-  box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.5);
-}
-.answer-display.empty::after {
-  content: '_';
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  50% { opacity: 0; }
 }
 
 /* === 反馈弹窗 === */
@@ -466,23 +294,6 @@ html, body {
   font-size: 10px;
 }
 
-/* === 通关画面 === */
-.victory-screen {
-  text-align: center;
-  align-items: center;
-}
-.victory-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 24px;
-  color: var(--gold);
-  text-shadow: 3px 3px 0 var(--dirt-dark);
-  margin: 16px 0;
-  animation: victoryBounce 1s infinite;
-}
-@keyframes victoryBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -508,7 +319,7 @@ html, body {
   color: var(--grass-dark);
 }
 
-/* === 勋章墙 === */
+/* === 共享标题 === */
 .screen-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 16px;
@@ -516,72 +327,6 @@ html, body {
   text-shadow: 2px 2px 0 var(--dirt-dark);
   text-align: center;
   margin-bottom: 12px;
-}
-.badge-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.badge {
-  background: rgba(255, 255, 255, 0.9);
-  border: 3px solid var(--dirt-dark);
-  padding: 12px 6px;
-  text-align: center;
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.badge.locked {
-  background: rgba(100, 100, 100, 0.6);
-  filter: grayscale(1);
-  opacity: 0.6;
-}
-.badge.unlocked {
-  background: linear-gradient(135deg, #FFF9C4, #FFD600);
-  border-color: var(--gold-dark);
-  animation: badgeShine 2s infinite;
-}
-@keyframes badgeShine {
-  0%, 100% { box-shadow: 0 0 4px var(--gold); }
-  50% { box-shadow: 0 0 16px var(--gold); }
-}
-.badge-icon {
-  font-size: 32px;
-  margin-bottom: 4px;
-}
-.badge-name {
-  font-size: 12px;
-  color: var(--text);
-  line-height: 1.2;
-}
-
-/* === 教学界面 === */
-.tutorial-step {
-  background: rgba(255, 255, 255, 0.95);
-  border: 4px solid var(--dirt-dark);
-  padding: 12px;
-  margin-bottom: 12px;
-}
-.tutorial-text {
-  font-size: 18px;
-  color: var(--text);
-  text-align: center;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-.demo-step {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  font-size: 18px;
-}
-.demo-arrow {
-  font-size: 24px;
-  color: var(--grass-dark);
 }
 
 /* === 工具按钮 === */
@@ -636,4 +381,30 @@ html, body {
   font-size: 18px;
   padding: 40px 0;
   text-shadow: 1px 1px 0 black;
+}
+
+/* === 方块标号 (cube → "1", bar → "10", mega → "N0") === */
+.cube-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: white;
+  text-shadow: 1px 1px 0 black, -1px -1px 0 black;
+  pointer-events: none;
+}
+.bar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  color: white;
+  text-shadow: 1px 1px 0 black, -1px -1px 0 black;
+  pointer-events: none;
 }

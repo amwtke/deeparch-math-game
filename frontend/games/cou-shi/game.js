@@ -1,8 +1,9 @@
 // === 游戏主控制器 ===
 // 屏幕状态机 + 题目流程
 
-const { el, renderBar, renderSingles, renderNumberAsBlocks,
-        renderProgressBar, makeStatCard } = window.Render;
+// el / renderBar / renderSingles / renderNumberAsBlocks /
+// renderProgressBar / makeStatCard 由 render.js 以全局函数声明的形式提供,
+// 不能再 `const` 解构(会和 var 类全局函数绑定冲突 → SyntaxError)。
 
 // ============== 配置 ==============
 const DAILY_TARGET = 10;
@@ -20,15 +21,12 @@ const BADGE_DEFS = [
 ];
 
 // ============== 状态 ==============
-let playerState = null;       // 从后端拉的玩家状态
 let currentCombo = 0;
 let currentSession = null;    // {correct, total, startTime}
 let currentQuestion = null;   // {a, b}
 let userAnswer = '';
 let hintShown = false;
 let questionStartTime = 0;
-
-const app = document.getElementById('app');
 
 // ============== 题目生成 ==============
 function generateQuestion() {
@@ -47,29 +45,14 @@ function generateQuestion() {
 
 // ============== 屏幕路由 ==============
 async function render(screen) {
+  const app = getHost();
   app.innerHTML = '';
-  app.appendChild(renderTopbar());
 
   if (screen === 'menu') app.appendChild(renderMenu());
   else if (screen === 'tutorial') app.appendChild(renderTutorial());
   else if (screen === 'game') app.appendChild(renderGame());
   else if (screen === 'badges') app.appendChild(renderBadges());
   else if (screen === 'victory') app.appendChild(renderVictory());
-}
-
-function renderTopbar() {
-  return el('div', { class: 'topbar' }, [
-    el('div', { class: 'stat' }, [
-      el('span', { class: 'stat-icon coin-icon' }),
-      el('span', null, String(playerState?.total_coins ?? 0)),
-    ]),
-    el('div', { class: 'stat', style: 'flex:1;justify-content:center;' }, [
-      el('span', null, '今日 ' + (playerState?.today_done ?? 0) + '/' + DAILY_TARGET),
-    ]),
-    el('div', { class: 'stat' }, [
-      el('span', null, '🔥' + currentCombo),
-    ]),
-  ]);
 }
 
 // ============== 主菜单 ==============
@@ -80,7 +63,7 @@ function renderMenu() {
   screen.appendChild(el('div', { class: 'game-subtitle' }, '⛏ 一起来挖方块学加法 ⛏'));
 
   // 每日进度
-  const done = playerState?.today_done ?? 0;
+  const done = Platform.playerState?.today_done ?? 0;
   const pct = Math.min(100, Math.round(done / DAILY_TARGET * 100));
   const progressBox = el('div', { style: 'width:100%;max-width:320px;margin:8px 0 16px;' });
   progressBox.appendChild(el('div', {
@@ -162,7 +145,7 @@ function renderTutorial() {
 function renderGame() {
   const screen = el('div', { class: 'screen' });
 
-  const done = playerState?.today_done ?? 0;
+  const done = Platform.playerState?.today_done ?? 0;
   const pct = Math.min(100, Math.round(done / DAILY_TARGET * 100));
   screen.appendChild(renderProgressBar(pct, '今日 ' + done + '/' + DAILY_TARGET));
 
@@ -196,7 +179,7 @@ function renderGame() {
 
   screen.appendChild(el('div', { class: 'btn-row' }, [
     el('button', { class: 'hint-btn', onclick: showHint }, '💡 提示'),
-    el('button', { class: 'back-btn', onclick: () => render('menu') }, '🏠 返回'),
+    el('button', { class: 'back-btn', onclick: () => Platform.exit() }, '🏠 退出'),
   ]));
 
   return screen;
@@ -209,7 +192,7 @@ function renderBadges() {
 
   const grid = el('div', { class: 'badge-grid' });
   BADGE_DEFS.forEach(b => {
-    const unlocked = playerState?.badges?.[b.key] === true;
+    const unlocked = Platform.playerState?.badges?.[b.key] === true;
     const badge = el('div', { class: 'badge ' + (unlocked ? 'unlocked' : 'locked') });
     badge.appendChild(el('div', { class: 'badge-icon' }, b.icon));
     badge.appendChild(el('div', { class: 'badge-name' }, unlocked ? b.name : '???'));
@@ -218,10 +201,10 @@ function renderBadges() {
   screen.appendChild(grid);
 
   const stats = el('div', { class: 'stats-grid', style: 'margin-top:24px;' });
-  stats.appendChild(makeStatCard('💰 总金币', playerState.total_coins));
-  stats.appendChild(makeStatCard('✓ 总答对', playerState.total_correct));
-  stats.appendChild(makeStatCard('🔥 最高连击', playerState.best_combo));
-  stats.appendChild(makeStatCard('📅 玩了天数', playerState.days_played));
+  stats.appendChild(makeStatCard('💰 总金币', Platform.playerState?.total_coins ?? 0));
+  stats.appendChild(makeStatCard('✓ 总答对', Platform.playerState?.total_correct ?? 0));
+  stats.appendChild(makeStatCard('🔥 最高连击', Platform.playerState?.best_combo ?? 0));
+  stats.appendChild(makeStatCard('📅 玩了天数', Platform.playerState?.days_played ?? 0));
   screen.appendChild(stats);
 
   screen.appendChild(el('button', {
@@ -243,11 +226,11 @@ function renderVictory() {
   const stats = el('div', { class: 'stats-grid' });
   stats.appendChild(makeStatCard('答对', currentSession.correct + '/' + currentSession.total));
   stats.appendChild(makeStatCard('正确率', accuracy + '%'));
-  stats.appendChild(makeStatCard('🔥 最高连击', playerState.best_combo));
-  stats.appendChild(makeStatCard('💰 当前金币', playerState.total_coins));
+  stats.appendChild(makeStatCard('🔥 最高连击', Platform.playerState?.best_combo ?? 0));
+  stats.appendChild(makeStatCard('💰 当前金币', Platform.playerState?.total_coins ?? 0));
   screen.appendChild(stats);
 
-  if (playerState.today_done >= DAILY_TARGET) {
+  if ((Platform.playerState?.today_done ?? 0) >= DAILY_TARGET) {
     screen.appendChild(el('div', {
       style: 'background:var(--gold);color:var(--text);padding:8px 16px;border:3px solid var(--gold-dark);margin:16px 0;font-size:18px;',
     }, '✨ 今日任务已完成! ✨'));
@@ -319,7 +302,7 @@ async function onSubmit() {
   currentCombo = result.new_combo;
 
   // 重新拉状态以更新顶栏
-  playerState = await Api.getState();
+  await Platform.refreshTopbar();
 
   if (result.correct) {
     currentSession.correct++;
@@ -377,9 +360,14 @@ function showFeedback(correct, result) {
 
   overlay.appendChild(card);
   document.body.appendChild(overlay);
+  const overlayCleanup = () => overlay.remove();
+  listenerCleanups.push(overlayCleanup);
 
   setTimeout(() => {
     overlay.remove();
+    const idx = listenerCleanups.indexOf(overlayCleanup);
+    if (idx >= 0) listenerCleanups.splice(idx, 1);
+    if (!hostElement) return;  // exited while timer was pending
     if (correct) {
       if (currentSession.total >= SESSION_LENGTH) {
         render('victory');
@@ -397,58 +385,49 @@ function showFeedback(correct, result) {
 function showHint() {
   if (hintShown) return;
   hintShown = true;
-
-  const q = currentQuestion;
-  const aOnes = q.a % 10;
-  const bOnes = q.b % 10;
-  const need = 10 - aOnes;
-  const remaining = bOnes - need;
-  const newTens = Math.floor(q.a / 10) + Math.floor(q.b / 10) + 1;
-
-  const overlay = el('div', { class: 'feedback-overlay show' });
-  const card = el('div', { class: 'feedback-card', style: 'border-color:var(--gold-dark);' });
-  card.appendChild(el('div', { class: 'feedback-icon' }, '💡'));
-  card.appendChild(el('div', { class: 'feedback-title', style: 'color:var(--gold-dark);' },
-    '凑十秘籍'));
-
-  const detail = el('div', {
-    style: 'text-align:left;font-size:18px;line-height:1.8;color:var(--text);margin-top:8px;',
+  Drag.openFurnace({
+    a: currentQuestion.a,
+    b: currentQuestion.b,
+    onClose: () => {
+      // 关掉模态后,孩子继续在键盘填答案;hintShown=true 已记录,
+      // 提交答案时通过 used_hint 字段告诉后端。
+    },
   });
-  detail.innerHTML =
-    '① 看 <b>' + aOnes + '</b> 差几凑10? <b style="color:var(--redstone);">差 ' + need + '</b><br>' +
-    '② 从 <b>' + bOnes + '</b> 借 <b style="color:var(--redstone);">' + need + '</b> 个 → 还剩 <b>' + remaining + '</b><br>' +
-    '③ 多了一条长方块! 现在有 <b style="color:var(--diamond-dark);">' + newTens + '</b> 条<br>' +
-    '④ ' + (newTens * 10) + ' + ' + remaining + ' = ?';
-  card.appendChild(detail);
-
-  card.appendChild(el('button', {
-    class: 'menu-btn',
-    style: 'margin-top:16px;font-size:16px;padding:8px 24px;',
-    onclick: () => overlay.remove(),
-  }, '我懂了!'));
-
-  overlay.appendChild(card);
-  document.body.appendChild(overlay);
 }
 
-// ============== 启动 ==============
-async function init() {
-  app.innerHTML = '<div class="loading">⛏ 加载中... ⛏</div>';
-  try {
-    playerState = await Api.getState();
+// ============== 模块入口 ==============
+let hostElement = null;  // platform 分配的 div
+let listenerCleanups = [];
+
+function getHost() {
+  if (!hostElement) throw new Error('CouShi 未初始化');
+  return hostElement;
+}
+
+window.CouShi = {
+  start(host) {
+    hostElement = host;
+    // 重置模块状态
+    currentCombo = 0;
+    currentSession = null;
+    currentQuestion = null;
+    userAnswer = '';
+    hintShown = false;
+    questionStartTime = 0;
+    // 全局监听器:点击解锁 audio
+    const unlock = () => {
+      Audio.unlock();
+      document.removeEventListener('click', unlock);
+    };
+    document.addEventListener('click', unlock, { once: true });
+    listenerCleanups.push(() => document.removeEventListener('click', unlock));
+    // 渲染主菜单
     render('menu');
-  } catch (e) {
-    app.innerHTML = '<div class="loading">❌ 后端连接失败<br><br>请检查服务器</div>';
-  }
-}
-
-document.addEventListener('touchend', e => {
-  if (e.target.tagName === 'BUTTON') e.preventDefault();
-}, { passive: false });
-
-document.addEventListener('click', function unlock() {
-  Audio.unlock();
-  document.removeEventListener('click', unlock);
-}, { once: true });
-
-init();
+  },
+  exit() {
+    listenerCleanups.forEach(fn => fn());
+    listenerCleanups = [];
+    if (hostElement) hostElement.innerHTML = '';
+    hostElement = null;
+  },
+};
