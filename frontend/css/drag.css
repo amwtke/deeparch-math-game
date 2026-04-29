@@ -58,17 +58,25 @@
   gap: 2px;
   align-items: center;
 }
-.pile-cubes.locked .furnace-cube {
-  filter: grayscale(0.8);
+.pile-cubes.locked .furnace-cube,
+.pile-cubes.locked .furnace-cube.red {
+  background: linear-gradient(135deg, #FFD54F, #FF8F00);
+  border-color: #FF6F00;
   cursor: not-allowed;
-  animation: locked-blink 1.4s ease-in-out infinite alternate;
+  animation: locked-blink 1.2s ease-in-out infinite alternate;
 }
 .pile-cubes.locked .furnace-cube.draggable {
   pointer-events: none;
 }
 @keyframes locked-blink {
-  from { opacity: 0.35; }
-  to { opacity: 0.75; }
+  from {
+    opacity: 0.6;
+    box-shadow: 0 0 2px gold;
+  }
+  to {
+    opacity: 1;
+    box-shadow: 0 0 10px gold;
+  }
 }
 
 /* 单块 */
