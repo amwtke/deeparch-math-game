@@ -30,23 +30,29 @@ function el(tag, attrs, children) {
 /**
  * 渲染一条10格的长方块 (1个十)
  * @param {string} color - '' (绿/草) | 'red' (红石) | 'diamond' (钻石,带闪光)
- * @param {number} count - 默认10
+ * @param {number} count - 默认10 (用于教学时局部展示,游戏内永远是10)
+ * @param {string} label - 中央文字,默认 '10';传 '' 则不显示
  */
-function renderBar(color, count = 10) {
+function renderBar(color, count = 10, label = '10') {
   const bar = el('div', { class: 'bar-block ' + (color || '') });
   for (let i = 0; i < count; i++) {
     bar.appendChild(el('div', { class: 'bar-cell' }));
+  }
+  if (label) {
+    bar.appendChild(el('div', { class: 'bar-label' }, label));
   }
   return bar;
 }
 
 /**
- * 渲染散块 (1个一×N)
+ * 渲染散块 (1个一×N),每块中央写"1"
  */
 function renderSingles(color, count) {
   const wrap = el('div', { style: 'display:flex;flex-wrap:wrap;justify-content:center;max-width:120px;' });
   for (let i = 0; i < count; i++) {
-    wrap.appendChild(el('div', { class: 'single-cube ' + (color || '') }));
+    const cube = el('div', { class: 'single-cube ' + (color || '') });
+    cube.appendChild(el('div', { class: 'cube-label' }, '1'));
+    wrap.appendChild(cube);
   }
   return wrap;
 }

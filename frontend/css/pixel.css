@@ -299,6 +299,7 @@ html, body {
   padding: 2px;
   border: 2px solid black;
   margin: 2px;
+  position: relative;  /* NEW: anchor for .bar-label */
 }
 .bar-block.red { background: var(--redstone-dark); }
 .bar-block.diamond {
@@ -330,6 +331,7 @@ html, body {
   border-right: 2px solid var(--grass-dark);
   border-bottom: 3px solid var(--grass-dark);
   margin: 1px;
+  position: relative;  /* NEW: anchor for .cube-label */
 }
 .single-cube.red {
   background: var(--redstone);
@@ -636,4 +638,30 @@ html, body {
   font-size: 18px;
   padding: 40px 0;
   text-shadow: 1px 1px 0 black;
+}
+
+/* === 方块标号 (cube → "1", bar → "10", mega → "N0") === */
+.cube-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: white;
+  text-shadow: 1px 1px 0 black;
+  pointer-events: none;
+}
+.bar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  color: white;
+  text-shadow: 1px 1px 0 black, -1px -1px 0 black;
+  pointer-events: none;
 }
