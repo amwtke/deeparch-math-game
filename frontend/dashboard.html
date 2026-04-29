@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 家长仪表盘 - 凑十大冒险</title>
+<link rel="stylesheet" href="/css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>📊 凑十大冒险 - 家长仪表盘</h1>
+      <div class="subtitle">最近 30 天的练习数据</div>
+    </div>
+    <button id="refresh-btn" class="refresh-btn">↻ 刷新</button>
+  </header>
+
+  <div id="kpi-grid" class="kpi-grid"></div>
+
+  <div class="two-col">
+    <div class="section">
+      <h2>📈 每日答题情况</h2>
+      <div class="chart-container">
+        <canvas id="daily-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🎯 最容易错的题</h2>
+      <div id="wrong-table-container"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+
+</body>
+</html>

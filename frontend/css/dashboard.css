@@ -1,0 +1,144 @@
+/* === 家长仪表盘 - 清爽现代风,跟游戏区分开 === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #F8F9FA;
+  color: #212529;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E9ECEF;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.subtitle {
+  color: #6C757D;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.refresh-btn {
+  background: #495057;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+}
+.refresh-btn:hover { background: #343A40; }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.kpi-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #E9ECEF;
+}
+.kpi-label {
+  font-size: 12px;
+  color: #6C757D;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #212529;
+}
+.kpi-trend {
+  font-size: 12px;
+  margin-top: 4px;
+}
+.kpi-trend.up { color: #2E7D32; }
+.kpi-trend.down { color: #C62828; }
+
+.section {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #E9ECEF;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #495057;
+}
+
+.chart-container {
+  position: relative;
+  height: 280px;
+}
+
+.wrong-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.wrong-table th, .wrong-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #F1F3F5;
+  font-size: 14px;
+}
+.wrong-table th {
+  font-weight: 500;
+  color: #6C757D;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.wrong-table .question {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+.wrong-table .count {
+  text-align: right;
+  color: #C62828;
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #ADB5BD;
+  font-size: 14px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+}

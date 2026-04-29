@@ -1,0 +1,639 @@
+/* === 凑十大冒险 - 像素风样式 === */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=ZCOOL+KuaiLe&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+:root {
+  --grass: #7CB342;
+  --grass-dark: #558B2F;
+  --grass-light: #AED581;
+  --dirt: #8D6E63;
+  --dirt-dark: #5D4037;
+  --stone: #757575;
+  --stone-dark: #424242;
+  --redstone: #E53935;
+  --redstone-dark: #B71C1C;
+  --diamond: #4FC3F7;
+  --diamond-dark: #0277BD;
+  --gold: #FFD600;
+  --gold-dark: #F57F17;
+  --emerald: #26A69A;
+  --emerald-dark: #00695C;
+  --sky: #87CEEB;
+  --sky-dark: #4FA8D8;
+  --text: #2C3E50;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'ZCOOL KuaiLe', 'Courier New', monospace;
+  background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 60%, #98D98E 60%, #7CB342 100%);
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+}
+
+/* === 飘动的云 === */
+.cloud {
+  position: fixed;
+  background: white;
+  opacity: 0.85;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow:
+    8px -8px 0 white,
+    -8px -8px 0 white,
+    16px 0 0 white,
+    -16px 0 0 white,
+    24px -8px 0 white,
+    -24px -8px 0 white;
+  animation: cloudMove 60s linear infinite;
+}
+.cloud.c1 { width: 32px; height: 16px; top: 8%; left: -10%; animation-duration: 80s; }
+.cloud.c2 { width: 24px; height: 12px; top: 18%; left: -15%; animation-duration: 100s; animation-delay: -30s; }
+.cloud.c3 { width: 40px; height: 20px; top: 25%; left: -20%; animation-duration: 120s; animation-delay: -60s; }
+
+@keyframes cloudMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(100vw + 200px)); }
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+}
+
+/* === 顶栏 === */
+.topbar {
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  border-bottom: 3px solid var(--dirt-dark);
+  flex-shrink: 0;
+}
+.topbar .stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stat-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  image-rendering: pixelated;
+}
+.coin-icon {
+  background: var(--gold);
+  border-radius: 50%;
+  border: 2px solid var(--gold-dark);
+}
+
+/* === 主屏幕容器 === */
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* === 主菜单 === */
+.menu-screen {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.game-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  color: white;
+  text-shadow: 3px 3px 0 var(--dirt-dark), 6px 6px 0 rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  letter-spacing: 2px;
+}
+.game-subtitle {
+  font-size: 18px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 6px 16px;
+  border: 3px solid var(--dirt-dark);
+  margin-bottom: 24px;
+}
+
+/* === 按钮 === */
+.menu-btn {
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 22px;
+  padding: 14px 32px;
+  margin: 6px;
+  background: var(--grass);
+  color: white;
+  border: none;
+  border-top: 4px solid var(--grass-light);
+  border-left: 4px solid var(--grass-light);
+  border-right: 4px solid var(--grass-dark);
+  border-bottom: 4px solid var(--grass-dark);
+  cursor: pointer;
+  text-shadow: 2px 2px 0 var(--grass-dark);
+  transition: transform 0.1s;
+  min-width: 200px;
+}
+.menu-btn:active {
+  transform: translate(2px, 2px);
+  border-top-color: var(--grass-dark);
+  border-left-color: var(--grass-dark);
+  border-right-color: var(--grass-light);
+  border-bottom-color: var(--grass-light);
+}
+.menu-btn.gold {
+  background: var(--gold);
+  border-top-color: #FFEB3B;
+  border-left-color: #FFEB3B;
+  border-right-color: var(--gold-dark);
+  border-bottom-color: var(--gold-dark);
+  color: var(--text);
+  text-shadow: 2px 2px 0 #FFEB3B;
+}
+.menu-btn.diamond {
+  background: var(--diamond);
+  border-top-color: #81D4FA;
+  border-left-color: #81D4FA;
+  border-right-color: var(--diamond-dark);
+  border-bottom-color: var(--diamond-dark);
+  text-shadow: 2px 2px 0 var(--diamond-dark);
+}
+
+/* === 史蒂夫像素头像 === */
+.steve-avatar {
+  width: 64px;
+  height: 64px;
+  margin: 16px auto;
+  background:
+    linear-gradient(to bottom,
+      transparent 0%, transparent 12%,
+      #6D4C41 12%, #6D4C41 35%,
+      #F5DEB3 35%, #F5DEB3 75%,
+      #2196F3 75%);
+  border: 3px solid var(--dirt-dark);
+  image-rendering: pixelated;
+  position: relative;
+}
+.steve-avatar::before, .steve-avatar::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  top: 42%;
+}
+.steve-avatar::before { left: 22%; }
+.steve-avatar::after { right: 22%; }
+
+/* === 进度条 === */
+.progress-bar {
+  background: rgba(0, 0, 0, 0.5);
+  border: 3px solid var(--dirt-dark);
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill {
+  background: linear-gradient(180deg, var(--grass-light), var(--grass));
+  height: 100%;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: white;
+  text-shadow: 1px 1px 0 black;
+}
+
+/* === 游戏题目卡片 === */
+.equation-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 4px solid var(--dirt-dark);
+  padding: 16px;
+  text-align: center;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
+}
+.equation {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 32px;
+  color: var(--text);
+  letter-spacing: 4px;
+  margin: 8px 0;
+}
+.equation .qmark {
+  color: var(--redstone);
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* === 方块世界 === */
+.block-world {
+  background: rgba(135, 206, 235, 0.4);
+  border: 4px solid var(--dirt-dark);
+  padding: 12px;
+  min-height: 180px;
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  position: relative;
+}
+.block-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.zone-label {
+  font-size: 16px;
+  color: white;
+  background: var(--dirt-dark);
+  padding: 4px 8px;
+  border: 2px solid black;
+}
+.blocks-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 120px;
+  padding: 4px;
+}
+
+/* 长条方块 (1个十) */
+.bar-block {
+  display: inline-flex;
+  background: var(--grass-dark);
+  padding: 2px;
+  border: 2px solid black;
+  margin: 2px;
+}
+.bar-block.red { background: var(--redstone-dark); }
+.bar-block.diamond {
+  background: var(--diamond-dark);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%, 100% { box-shadow: 0 0 4px var(--diamond); }
+  50% { box-shadow: 0 0 12px var(--diamond), 0 0 20px white; }
+}
+.bar-cell {
+  width: 14px;
+  height: 18px;
+  background: var(--grass);
+  border-top: 2px solid var(--grass-light);
+  border-bottom: 1px solid var(--grass-dark);
+}
+.bar-block.red .bar-cell { background: var(--redstone); border-top-color: #FFCDD2; }
+.bar-block.diamond .bar-cell { background: var(--diamond); border-top-color: #B3E5FC; }
+
+/* 散块 */
+.single-cube {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  background: var(--grass);
+  border-top: 3px solid var(--grass-light);
+  border-left: 2px solid var(--grass);
+  border-right: 2px solid var(--grass-dark);
+  border-bottom: 3px solid var(--grass-dark);
+  margin: 1px;
+}
+.single-cube.red {
+  background: var(--redstone);
+  border-top-color: #FFCDD2;
+  border-right-color: var(--redstone-dark);
+  border-bottom-color: var(--redstone-dark);
+}
+
+/* === 数字键盘 === */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+.keypad-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  padding: 18px 0;
+  background: var(--stone);
+  color: white;
+  border: none;
+  border-top: 4px solid #BDBDBD;
+  border-left: 4px solid #BDBDBD;
+  border-right: 4px solid var(--stone-dark);
+  border-bottom: 4px solid var(--stone-dark);
+  cursor: pointer;
+  text-shadow: 2px 2px 0 var(--stone-dark);
+  transition: transform 0.05s;
+}
+.keypad-btn:active {
+  transform: translate(2px, 2px);
+  border-top-color: var(--stone-dark);
+  border-left-color: var(--stone-dark);
+  border-right-color: #BDBDBD;
+  border-bottom-color: #BDBDBD;
+}
+.keypad-btn.delete {
+  background: var(--redstone);
+  border-top-color: #EF9A9A;
+  border-left-color: #EF9A9A;
+  border-right-color: var(--redstone-dark);
+  border-bottom-color: var(--redstone-dark);
+}
+.keypad-btn.submit {
+  background: var(--grass);
+  border-top-color: var(--grass-light);
+  border-left-color: var(--grass-light);
+  border-right-color: var(--grass-dark);
+  border-bottom-color: var(--grass-dark);
+}
+
+/* === 答案显示 === */
+.answer-display {
+  background: black;
+  color: var(--gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  padding: 12px;
+  text-align: center;
+  border: 4px solid var(--dirt-dark);
+  min-height: 56px;
+  letter-spacing: 8px;
+  box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+.answer-display.empty::after {
+  content: '_';
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* === 反馈弹窗 === */
+.feedback-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.feedback-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.feedback-card {
+  background: white;
+  padding: 24px 32px;
+  border: 6px solid var(--dirt-dark);
+  text-align: center;
+  transform: scale(0.5);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.4);
+  max-width: 90%;
+}
+.feedback-overlay.show .feedback-card {
+  transform: scale(1);
+}
+.feedback-card.correct { border-color: var(--grass-dark); }
+.feedback-card.wrong { border-color: var(--redstone-dark); }
+.feedback-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+.feedback-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.feedback-card.correct .feedback-title { color: var(--grass-dark); }
+.feedback-card.wrong .feedback-title { color: var(--redstone-dark); }
+.feedback-detail {
+  font-size: 18px;
+  color: var(--text);
+  margin: 8px 0;
+}
+.reward-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.reward-pill {
+  background: var(--gold);
+  color: var(--text);
+  padding: 4px 10px;
+  border: 2px solid var(--gold-dark);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+}
+
+/* === 通关画面 === */
+.victory-screen {
+  text-align: center;
+  align-items: center;
+}
+.victory-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 24px;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 var(--dirt-dark);
+  margin: 16px 0;
+  animation: victoryBounce 1s infinite;
+}
+@keyframes victoryBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+  width: 100%;
+  max-width: 320px;
+}
+.stat-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid var(--dirt-dark);
+  padding: 12px;
+  text-align: center;
+}
+.stat-card .label {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.stat-card .value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 20px;
+  color: var(--grass-dark);
+}
+
+/* === 勋章墙 === */
+.screen-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  color: white;
+  text-shadow: 2px 2px 0 var(--dirt-dark);
+  text-align: center;
+  margin-bottom: 12px;
+}
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.badge {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid var(--dirt-dark);
+  padding: 12px 6px;
+  text-align: center;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.badge.locked {
+  background: rgba(100, 100, 100, 0.6);
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+.badge.unlocked {
+  background: linear-gradient(135deg, #FFF9C4, #FFD600);
+  border-color: var(--gold-dark);
+  animation: badgeShine 2s infinite;
+}
+@keyframes badgeShine {
+  0%, 100% { box-shadow: 0 0 4px var(--gold); }
+  50% { box-shadow: 0 0 16px var(--gold); }
+}
+.badge-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+.badge-name {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+/* === 教学界面 === */
+.tutorial-step {
+  background: rgba(255, 255, 255, 0.95);
+  border: 4px solid var(--dirt-dark);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.tutorial-text {
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.demo-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  font-size: 18px;
+}
+.demo-arrow {
+  font-size: 24px;
+  color: var(--grass-dark);
+}
+
+/* === 工具按钮 === */
+.hint-btn {
+  background: var(--gold);
+  color: var(--text);
+  border: none;
+  border-top: 3px solid #FFEB3B;
+  border-left: 3px solid #FFEB3B;
+  border-right: 3px solid var(--gold-dark);
+  border-bottom: 3px solid var(--gold-dark);
+  padding: 8px 16px;
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0 4px;
+}
+.back-btn {
+  background: var(--stone);
+  color: white;
+  border: none;
+  border-top: 3px solid #BDBDBD;
+  border-left: 3px solid #BDBDBD;
+  border-right: 3px solid var(--stone-dark);
+  border-bottom: 3px solid var(--stone-dark);
+  padding: 8px 16px;
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0 4px;
+}
+.btn-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+/* === 动画工具类 === */
+.shake { animation: shake 0.4s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+/* 加载状态 */
+.loading {
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  padding: 40px 0;
+  text-shadow: 1px 1px 0 black;
+}
