@@ -1,8 +1,9 @@
 // === 游戏主控制器 ===
 // 屏幕状态机 + 题目流程
 
-const { el, renderBar, renderSingles, renderNumberAsBlocks,
-        renderProgressBar, makeStatCard } = window.Render;
+// el / renderBar / renderSingles / renderNumberAsBlocks /
+// renderProgressBar / makeStatCard 由 render.js 以全局函数声明的形式提供,
+// 不能再 `const` 解构(会和 var 类全局函数绑定冲突 → SyntaxError)。
 
 // ============== 配置 ==============
 const DAILY_TARGET = 10;
