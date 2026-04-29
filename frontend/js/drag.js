@@ -141,27 +141,30 @@
 
   // ---- drag & tap unified handler ----
 
+  function handleTap(elem) {
+    if (!modalState) return;
+    const stage = modalState.stage;
+    if (elem.classList.contains('furnace-cube') && stage === 1) {
+      if (elem.parentElement === modalState.cubeFurnaceContent) {
+        removeCubeFromFurnace(elem);
+      } else {
+        addCubeToFurnace(elem);
+      }
+    } else if (elem.classList.contains('furnace-bar') && stage === 2) {
+      if (elem.parentElement === modalState.barFurnaceContent) {
+        removeBarFromFurnace(elem);
+      } else {
+        addBarToFurnace(elem);
+      }
+    }
+  }
+
   function makeDraggable(elem) {
     elem.classList.add('draggable');
-    // tap
-    elem.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const stage = modalState.stage;
-      if (elem.classList.contains('furnace-cube') && stage === 1) {
-        if (elem.parentElement === modalState.cubeFurnaceContent) {
-          removeCubeFromFurnace(elem);
-        } else {
-          addCubeToFurnace(elem);
-        }
-      } else if (elem.classList.contains('furnace-bar') && stage === 2) {
-        if (elem.parentElement === modalState.barFurnaceContent) {
-          removeBarFromFurnace(elem);
-        } else {
-          addBarToFurnace(elem);
-        }
-      }
-    });
-    // pointer drag
+    // pointer drag (tap is handled in onPointerUp when !ctx.moved,
+    // so we don't need a separate click listener — avoids double-fire
+    // and also works on Android Chrome where preventDefault on
+    // pointerdown suppresses the synthetic click event).
     elem.addEventListener('pointerdown', (e) => onPointerDown(e, elem));
   }
 
@@ -215,7 +218,11 @@
     ctx.elem.style.zIndex = '';
 
     if (!ctx.moved) {
+      // Restore element to its origin parent, then fire the tap action
+      // directly. We can't rely on the synthetic click event because
+      // preventDefault on pointerdown suppresses it on Android Chrome.
       ctx.origParent.appendChild(ctx.elem);
+      handleTap(ctx.elem);
       return;
     }
 
@@ -236,6 +243,7 @@
   // ---- stage 1: cubes -> 10 -> bar ----
 
   function addCubeToFurnace(cube) {
+    if (!modalState) return;
     if (modalState.stage !== 1) return;
     if (modalState.cubeFurnaceCount >= 10) return;
     modalState.cubeFurnaceContent.appendChild(cube);
@@ -247,6 +255,7 @@
   }
 
   function removeCubeFromFurnace(cube) {
+    if (!modalState) return;
     const target = cube.classList.contains('red') ? modalState.pileBCubes : modalState.pileACubes;
     target.appendChild(cube);
     modalState.cubeFurnaceCount--;
@@ -295,6 +304,7 @@
   }
 
   function addBarToFurnace(bar) {
+    if (!modalState) return;
     if (modalState.stage !== 2) return;
     if (modalState.barFurnaceCount >= modalState.totalBars) return;
     modalState.barFurnaceContent.appendChild(bar);
@@ -306,6 +316,7 @@
   }
 
   function removeBarFromFurnace(bar) {
+    if (!modalState) return;
     modalState.pileATens.appendChild(bar);
     modalState.barFurnaceCount--;
     updateBarCounter();
