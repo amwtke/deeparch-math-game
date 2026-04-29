@@ -360,9 +360,14 @@ function showFeedback(correct, result) {
 
   overlay.appendChild(card);
   document.body.appendChild(overlay);
+  const overlayCleanup = () => overlay.remove();
+  listenerCleanups.push(overlayCleanup);
 
   setTimeout(() => {
     overlay.remove();
+    const idx = listenerCleanups.indexOf(overlayCleanup);
+    if (idx >= 0) listenerCleanups.splice(idx, 1);
+    if (!hostElement) return;  // exited while timer was pending
     if (correct) {
       if (currentSession.total >= SESSION_LENGTH) {
         render('victory');
@@ -404,10 +409,16 @@ function showHint() {
     '④ ' + (newTens * 10) + ' + ' + remaining + ' = ?';
   card.appendChild(detail);
 
+  const overlayCleanup = () => overlay.remove();
+  listenerCleanups.push(overlayCleanup);
   card.appendChild(el('button', {
     class: 'menu-btn',
     style: 'margin-top:16px;font-size:16px;padding:8px 24px;',
-    onclick: () => overlay.remove(),
+    onclick: () => {
+      overlay.remove();
+      const idx = listenerCleanups.indexOf(overlayCleanup);
+      if (idx >= 0) listenerCleanups.splice(idx, 1);
+    },
   }, '我懂了!'));
 
   overlay.appendChild(card);

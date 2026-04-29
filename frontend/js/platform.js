@@ -80,6 +80,10 @@
     },
 
     enterGame(gameId) {
+      if (currentGameId) {
+        console.error('enterGame called while another game is active:', currentGameId);
+        return;
+      }
       const manifest = (window.Games || []).find(g => g.id === gameId);
       if (!manifest) { console.error('game not found:', gameId); return; }
       if (!manifest.enabled) return;
