@@ -277,6 +277,7 @@
       if (!modalState) return;  // closed mid-animation
       modalState.cubeFurnaceContent.innerHTML = '';
       modalState.cubeFurnaceCounter.textContent = '✨ 化成了 1 条!';
+      modalState.cubeFurnace.classList.remove('full');
       const newBar = makeBar('diamond', '10', false);
       modalState.pileATens.appendChild(newBar);
       modalState.stageBanner.textContent =
@@ -339,6 +340,7 @@
       if (!modalState) return;
       modalState.barFurnaceContent.innerHTML = '';
       modalState.barFurnaceCounter.textContent = '✨ 化成了一个大方块!';
+      modalState.barFurnace.classList.remove('full');
       const sum = modalState.totalBars * 10;
       const mega = el('div', { class: 'mega-block' }, String(sum));
       modalState.megaArea.appendChild(mega);

@@ -60,11 +60,15 @@
 }
 .pile-cubes.locked .furnace-cube {
   filter: grayscale(0.8);
-  opacity: 0.5;
   cursor: not-allowed;
+  animation: locked-blink 1.4s ease-in-out infinite alternate;
 }
 .pile-cubes.locked .furnace-cube.draggable {
   pointer-events: none;
+}
+@keyframes locked-blink {
+  from { opacity: 0.35; }
+  to { opacity: 0.75; }
 }
 
 /* 单块 */
@@ -179,7 +183,17 @@
   font-weight: bold;
   text-align: center;
   text-shadow: 2px 2px 0 black;
-  box-shadow: 0 0 20px gold;
+  animation: mega-glow 1.2s ease-in-out infinite alternate;
+}
+@keyframes mega-glow {
+  from {
+    box-shadow: 0 0 8px gold;
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 28px gold, 0 0 12px white;
+    transform: scale(1.04);
+  }
 }
 
 .furnace-buttons {
