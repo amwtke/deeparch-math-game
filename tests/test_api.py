@@ -131,9 +131,11 @@ def test_static_files_have_no_cache_header(client):
 
 
 def test_games_static_directory_is_mounted(client):
-    """/games/<id>/* must serve from frontend/games/."""
-    # We don't have games/ files yet; this test will be enabled when
-    # Task 3 creates frontend/games/cou-shi/game.js. For now, check
-    # the mount returns 404 (not 500).
+    """/games/<id>/* must serve from frontend/games/.
+
+    frontend/games/cou-shi/ exists; this test confirms a non-existent
+    path under /games/ returns 404 (not 500), proving the mount is
+    wired correctly even when files don't exist.
+    """
     r = client.get("/games/nope/missing.js")
     assert r.status_code == 404

@@ -317,7 +317,8 @@
 
   function removeBarFromFurnace(bar) {
     if (!modalState) return;
-    modalState.pileATens.appendChild(bar);
+    const target = bar.classList.contains('red') ? modalState.pileBTens : modalState.pileATens;
+    target.appendChild(bar);
     modalState.barFurnaceCount--;
     updateBarCounter();
   }
