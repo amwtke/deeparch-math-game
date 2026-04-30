@@ -14,6 +14,19 @@
     return hostElement;
   }
 
+  // 把 fn 推进 listenerCleanups 队列,返回一个"自移除"包装:
+  // 调用它时执行 fn 并从队列里 splice 掉,避免数组无限增长。
+  // 用法:const dispose = trackCleanup(() => overlay.remove());
+  //       btn.onclick = () => { dispose(); next(); };
+  function trackCleanup(fn) {
+    listenerCleanups.push(fn);
+    return () => {
+      fn();
+      const idx = listenerCleanups.indexOf(fn);
+      if (idx >= 0) listenerCleanups.splice(idx, 1);
+    };
+  }
+
   // === 当前题目状态 ===
   // currentQuestion = { number: 10..99, type: 'observe' | 'decompose' | 'compose' }
   const QUESTION_TYPES = ['observe', 'decompose', 'compose'];
@@ -171,7 +184,8 @@
     pop.style.left = (r.left + r.width / 2 - 36) + 'px';
     pop.style.top = (r.top - 8) + 'px';
     document.body.appendChild(pop);
-    setTimeout(() => pop.remove(), 900);
+    const dispose = trackCleanup(() => pop.remove());
+    setTimeout(dispose, 900);
   }
 
   function makeOneBlock() {
@@ -366,15 +380,14 @@
     }, String(num)));
     overlay.appendChild(row);
 
+    document.body.appendChild(overlay);
+    const dispose = trackCleanup(() => overlay.remove());
     const btn = el('button', {
       class: 'ck-celebrate-btn',
       style: 'margin-top:20px;',
-      onclick: () => { overlay.remove(); if (done) done(); },
+      onclick: () => { dispose(); if (done) done(); },
     }, '▶ 我懂了');
     overlay.appendChild(btn);
-
-    document.body.appendChild(overlay);
-    listenerCleanups.push(() => overlay.remove());
   }
 
   // === decompose 提交 + 反馈逻辑 ===
@@ -432,14 +445,14 @@
     card.appendChild(el('div', {
       style: 'font-size:16px;color:#5D4037;margin-top:6px;',
     }, '没关系,下一道继续'));
-    const btn = el('button', {
-      class: 'ck-celebrate-btn',
-      onclick: () => { overlay.remove(); nextQuestion(); },
-    }, '▶ 继续');
-    card.appendChild(btn);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
-    listenerCleanups.push(() => overlay.remove());
+    const dispose = trackCleanup(() => overlay.remove());
+    const btn = el('button', {
+      class: 'ck-celebrate-btn',
+      onclick: () => { dispose(); nextQuestion(); },
+    }, '▶ 继续');
+    card.appendChild(btn);
   }
 
   // === 教程屏:第一次进游戏时显示一次,用 localStorage 标记 ===
@@ -650,9 +663,8 @@
         'font-family:"ZCOOL KuaiLe",sans-serif;font-size:18px;z-index:1000;',
     }, text);
     document.body.appendChild(t);
-    const cleanup = () => t.remove();
-    listenerCleanups.push(cleanup);
-    setTimeout(cleanup, 2200);
+    const dispose = trackCleanup(() => t.remove());
+    setTimeout(dispose, 2200);
   }
 
   async function finalizeObserve() {
@@ -686,19 +698,22 @@
       bRow.appendChild(el('div', { class: 'ck-celebrate-badges-title' },
         '🏆 解锁新勋章!'));
       result.new_badges.forEach(k => {
-        bRow.appendChild(el('div', { class: 'ck-celebrate-badge-name' }, k));
+        // 用图标 + 中文名,7 岁孩子读不懂英文 key
+        const def = window.BadgeDefs && window.BadgeDefs.byKey(k);
+        const text = def ? (def.icon + ' ' + def.name) : k;
+        bRow.appendChild(el('div', { class: 'ck-celebrate-badge-name' }, text));
       });
       card.appendChild(bRow);
     }
 
-    const btn = el('button', {
-      class: 'ck-celebrate-btn',
-      onclick: () => { overlay.remove(); if (done) done(); },
-    }, '▶ 继续');
-    card.appendChild(btn);
     overlay.appendChild(card);
     document.body.appendChild(overlay);
-    listenerCleanups.push(() => overlay.remove());
+    const dispose = trackCleanup(() => overlay.remove());
+    const btn = el('button', {
+      class: 'ck-celebrate-btn',
+      onclick: () => { dispose(); if (done) done(); },
+    }, '▶ 继续');
+    card.appendChild(btn);
   }
 
   // ============== 敲矿核心交互 ==============
@@ -768,6 +783,7 @@
       fly.style.left = sx + 'px';
       fly.style.top = sy + 'px';
       document.body.appendChild(fly);
+      const flyDispose = trackCleanup(() => fly.remove());
 
       // 终点:个位区中心,带一点散开
       const tx = targetRect.left + targetRect.width / 2 - sx
@@ -790,7 +806,7 @@
       });
 
       setTimeout(() => {
-        fly.remove();
+        flyDispose();
         onesCount++;
         onesArea.appendChild(makeOneBlock());
         updateBinCounts();
@@ -850,7 +866,8 @@
         pop.style.left = (r.left + r.width / 2 - popOffset) + 'px';
         pop.style.top = (r.top - 14) + 'px';
         document.body.appendChild(pop);
-        setTimeout(() => pop.remove(), 900);
+        const popDispose = trackCleanup(() => pop.remove());
+        setTimeout(popDispose, 900);
 
         // 音效:数到 1-9 用 key("嗒"),数到 10 用 merge("嗡!")
         if (isFinal) Audio.merge();
@@ -884,21 +901,24 @@
         btn.style.top = (startRect.top - 64) + 'px';
         document.body.appendChild(btn);
 
-        // 退出游戏时(中途按"我玩够了")也要清理掉这两个浮窗
+        // 中途按"我玩够了"时统一兜底:bar + btn 一起移除。
+        // 用户点按钮后手动 splice 这个 cleanup,然后 bar 继续做飞行动画。
         let collected = false;
-        const cleanup = () => {
+        const safetyCleanup = () => {
           bar.remove();
           btn.remove();
         };
-        listenerCleanups.push(cleanup);
+        listenerCleanups.push(safetyCleanup);
 
         btn.onclick = () => {
           if (collected) return;
           collected = true;
+          // 把兜底 cleanup 从队列里摘掉(bar 不再由它管理,要继续动画)
+          const idx = listenerCleanups.indexOf(safetyCleanup);
+          if (idx >= 0) listenerCleanups.splice(idx, 1);
+
           Audio.correct();
           btn.remove();
-
-          // 长条不再脉冲,改为飞行
           bar.classList.remove('ck-collect-bar');
           bar.classList.add('ck-fly');
 
@@ -923,7 +943,8 @@
           reward.style.left = (startRect.left + 10) + 'px';
           reward.style.top = startRect.top + 'px';
           document.body.appendChild(reward);
-          setTimeout(() => reward.remove(), 1300);
+          const rewardDispose = trackCleanup(() => reward.remove());
+          setTimeout(rewardDispose, 1300);
 
           setTimeout(() => {
             bar.remove();
