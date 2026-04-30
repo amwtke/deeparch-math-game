@@ -1,9 +1,13 @@
 /* === 主页角色位 === */
 .platform-home.with-avatar {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
+  grid-template-columns: 300px 1fr;
+  gap: 32px;
   align-items: center;
+  max-width: 960px;
+}
+.platform-home.with-avatar .game-grid {
+  grid-template-columns: repeat(3, 1fr);
 }
 .platform-avatar-slot {
   display: flex;
@@ -15,15 +19,70 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 .avatar-home-tile {
   cursor: pointer;
   transition: transform 0.2s ease;
+  position: relative;
+  padding: 36px 32px;
+  background: linear-gradient(180deg, #ffe7ef, #ffd0e0);
+  border: 10px double #c97f96;
+  border-radius: 12px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
 }
 .avatar-home-tile:hover { transform: scale(1.05); }
 .avatar-home-tile .avatar-svg {
   width: 200px; height: 400px; display: block;
+  animation: avatar-idle 2.4s ease-in-out infinite;
+}
+@keyframes avatar-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.avatar-frame-pearl {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #e8c8d4 70%, #b07a8c);
+}
+.avatar-frame-pearl.p1 { top: -6px; left: -6px; }
+.avatar-frame-pearl.p2 { top: -6px; right: -6px; }
+.avatar-frame-pearl.p3 { bottom: -6px; left: -6px; }
+.avatar-frame-pearl.p4 { bottom: -6px; right: -6px; }
+
+.avatar-frame-ribbon {
+  position: absolute;
+  top: -28px;
+  left: 50%; transform: translateX(-50%);
+  width: 56px; height: 32px;
+}
+.avatar-frame-ribbon::before,
+.avatar-frame-ribbon::after {
+  content: '';
+  position: absolute; top: 4px;
+  width: 22px; height: 22px;
+  background: #ff7aa8;
+  border: 3px solid #b04068;
+  box-shadow: inset -3px -3px 0 #d6588a;
+}
+.avatar-frame-ribbon::before {
+  left: 0;
+  clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%);
+}
+.avatar-frame-ribbon::after {
+  right: 0;
+  clip-path: polygon(0 25%, 100% 0, 100% 100%, 0 75%);
+}
+.avatar-frame-ribbon .knot {
+  position: absolute;
+  left: 50%; top: 8px;
+  transform: translateX(-50%);
+  width: 14px; height: 14px;
+  background: #ff7aa8;
+  border: 3px solid #b04068;
+  box-shadow: inset -2px -2px 0 #d6588a;
+  z-index: 2;
 }
 .avatar-home-hint {
   background: rgba(0, 0, 0, 0.6);

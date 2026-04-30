@@ -29,6 +29,13 @@
         onclick: () => window.Platform?.enterShop?.(),
       });
       tile.innerHTML = window.Avatar.render(equipped);
+      // 装饰:像素蝴蝶结 + 四角珍珠
+      const ribbon = el('div', { class: 'avatar-frame-ribbon' });
+      ribbon.appendChild(el('span', { class: 'knot' }));
+      tile.appendChild(ribbon);
+      ['p1', 'p2', 'p3', 'p4'].forEach(pos => {
+        tile.appendChild(el('span', { class: 'avatar-frame-pearl ' + pos }));
+      });
       const hint = el('div', { class: 'avatar-home-hint' }, '点我换装');
       const wrap = el('div', { class: 'avatar-home-wrap' });
       wrap.appendChild(tile);
