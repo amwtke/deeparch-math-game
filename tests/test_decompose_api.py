@@ -135,3 +135,159 @@ def test_get_compose_correct_count(client):
             correct=correct, elapsed_ms=3000,
         )
     assert db.get_compose_correct_count() == 3
+
+
+def test_observe_question_always_correct(client):
+    """observe 题型不需要 user_*,永远判对,给 1 金币。"""
+    r = client.post("/api/decompose/answer", json={
+        "number": 47,
+        "question_type": "observe",
+        "elapsed_ms": 5000,
+    })
+    assert r.status_code == 200
+    data = r.json()
+    assert data["correct"] is True
+    assert data["expected_tens"] == 4
+    assert data["expected_ones"] == 7
+    assert data["coins_earned"] == 1
+    assert data["today_done"] == 1
+
+
+def test_decompose_question_correct(client):
+    r = client.post("/api/decompose/answer", json={
+        "number": 53,
+        "question_type": "decompose",
+        "user_tens": 5,
+        "user_ones": 3,
+        "elapsed_ms": 8000,
+    })
+    data = r.json()
+    assert data["correct"] is True
+    assert data["expected_tens"] == 5
+    assert data["expected_ones"] == 3
+    assert data["coins_earned"] == 1
+
+
+def test_decompose_question_wrong(client):
+    r = client.post("/api/decompose/answer", json={
+        "number": 53,
+        "question_type": "decompose",
+        "user_tens": 5,
+        "user_ones": 4,           # 错
+        "elapsed_ms": 8000,
+    })
+    data = r.json()
+    assert data["correct"] is False
+    assert data["expected_tens"] == 5
+    assert data["expected_ones"] == 3
+    assert data["coins_earned"] == 0
+
+
+def test_compose_question_correct(client):
+    r = client.post("/api/decompose/answer", json={
+        "number": 36,
+        "question_type": "compose",
+        "user_number": 36,
+        "elapsed_ms": 4000,
+    })
+    data = r.json()
+    assert data["correct"] is True
+    assert data["coins_earned"] == 1
+
+
+def test_compose_question_wrong(client):
+    r = client.post("/api/decompose/answer", json={
+        "number": 36,
+        "question_type": "compose",
+        "user_number": 63,        # 错
+        "elapsed_ms": 4000,
+    })
+    data = r.json()
+    assert data["correct"] is False
+    assert data["coins_earned"] == 0
+
+
+def test_decompose_50_badge(client):
+    """累计 50 道分解题(无论题型/对错)解锁 decompose_50。"""
+    for i in range(49):
+        r = client.post("/api/decompose/answer", json={
+            "number": 23, "question_type": "observe", "elapsed_ms": 1000,
+        })
+    # 第 49 道还没解锁
+    assert "decompose_50" not in r.json()["new_badges"]
+    # 第 50 道解锁
+    r = client.post("/api/decompose/answer", json={
+        "number": 23, "question_type": "observe", "elapsed_ms": 1000,
+    })
+    assert "decompose_50" in r.json()["new_badges"]
+
+
+def test_decompose_streak_5_badge(client):
+    """连续答对 5 道 decompose 题,解锁 decompose_streak_5。"""
+    last = None
+    for _ in range(5):
+        last = client.post("/api/decompose/answer", json={
+            "number": 47, "question_type": "decompose",
+            "user_tens": 4, "user_ones": 7,
+            "elapsed_ms": 2000,
+        })
+    assert "decompose_streak_5" in last.json()["new_badges"]
+
+
+def test_decompose_streak_resets_on_wrong(client):
+    """答错重置 streak,但不扣金币不计错负面反馈。"""
+    for _ in range(4):
+        client.post("/api/decompose/answer", json={
+            "number": 47, "question_type": "decompose",
+            "user_tens": 4, "user_ones": 7, "elapsed_ms": 1000,
+        })
+    # 第 5 道答错
+    r = client.post("/api/decompose/answer", json={
+        "number": 47, "question_type": "decompose",
+        "user_tens": 5, "user_ones": 7,           # 错
+        "elapsed_ms": 1000,
+    })
+    assert r.json()["correct"] is False
+    assert "decompose_streak_5" not in r.json()["new_badges"]
+
+
+def test_compose_perfect_10_badge(client):
+    """compose 累计答对 10 道,解锁 compose_perfect_10。"""
+    last = None
+    for _ in range(10):
+        last = client.post("/api/decompose/answer", json={
+            "number": 36, "question_type": "compose",
+            "user_number": 36, "elapsed_ms": 2000,
+        })
+    assert "compose_perfect_10" in last.json()["new_badges"]
+
+
+def test_compose_wrong_does_not_count_toward_perfect(client):
+    """答错的 compose 题不算入 compose_perfect_10。"""
+    for _ in range(9):
+        client.post("/api/decompose/answer", json={
+            "number": 36, "question_type": "compose",
+            "user_number": 36, "elapsed_ms": 2000,
+        })
+    # 第 10 道答错,不解锁
+    r = client.post("/api/decompose/answer", json={
+        "number": 36, "question_type": "compose",
+        "user_number": 63, "elapsed_ms": 2000,
+    })
+    assert "compose_perfect_10" not in r.json()["new_badges"]
+
+
+def test_total_coins_shared_with_cou_shi(client):
+    """金币池共享,分解游戏与 cou-shi 共用 player_state.total_coins。"""
+    # 在 cou-shi 答对一道
+    client.post("/api/answer", json={
+        "a": 28, "b": 15, "user_answer": 43,
+        "elapsed_ms": 3000, "used_hint": False, "current_combo": 0,
+    })
+    coins_after_cou_shi = client.get("/api/state").json()["total_coins"]
+    # 在分解游戏答对一道
+    client.post("/api/decompose/answer", json={
+        "number": 47, "question_type": "observe", "elapsed_ms": 2000,
+    })
+    coins_after_chai_kuang = client.get("/api/state").json()["total_coins"]
+    assert coins_after_chai_kuang == coins_after_cou_shi + 1
