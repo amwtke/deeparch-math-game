@@ -22,13 +22,20 @@
   let onesCount = 0;
 
   function renderOre() {
+    // 一整块像素风石头方块。`oreRemaining` 由 game logic 跟踪,
+    // strike 时动态生成飞出的小方块(不再预渲染 N 个 cube)。
     const ore = el('div', { class: 'ck-ore', id: 'ck-ore' });
-    for (let i = 0; i < oreRemaining; i++) {
-      ore.appendChild(el('div', { class: 'ck-ore-cube' }));
-    }
     ore.appendChild(el('div', { class: 'ck-ore-label', id: 'ck-ore-label' },
       String(oreRemaining)));
     return ore;
+  }
+
+  function renderHammer() {
+    // 像素风锤子:头(石) + 柄(木),两个 div 拼出来,不用 emoji。
+    const hammer = el('div', { class: 'ck-hammer', id: 'ck-hammer' });
+    hammer.appendChild(el('div', { class: 'ck-hammer-head' }));
+    hammer.appendChild(el('div', { class: 'ck-hammer-handle' }));
+    return hammer;
   }
 
   function renderInventory() {
@@ -71,8 +78,10 @@
     }, '🏠 我玩够了'));
 
     const oreArea = el('div', { class: 'ck-ore-area' });
-    oreArea.appendChild(el('div', { class: 'ck-hammer', id: 'ck-hammer' }, '🔨'));
-    oreArea.appendChild(renderOre());
+    const oreWrap = el('div', { style: 'position:relative;' });
+    oreWrap.appendChild(renderOre());
+    oreWrap.appendChild(renderHammer());
+    oreArea.appendChild(oreWrap);
     screen.appendChild(oreArea);
 
     screen.appendChild(renderInventory());

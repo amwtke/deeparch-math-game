@@ -29,29 +29,45 @@
   min-height: 180px;
 }
 
+/* 整块像素风石头方块。47 个"内部小方块"不再出现在 DOM 里 ——
+   strike 时再动态生成飞出的小方块。 */
 .ck-ore {
   position: relative;
-  width: 280px;
-  min-height: 240px;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: center;
+  width: 240px;
+  height: 240px;
   cursor: pointer;
-  transition: transform 0.1s;
   user-select: none;
-  padding: 8px;
+  image-rendering: pixelated;
+  /* 多层叠加模拟石头肌理 + 立体浮雕边框 */
+  background:
+    /* 浅色斑点(高光) */
+    repeating-linear-gradient(45deg,
+      transparent 0px, transparent 18px,
+      rgba(255,255,255,0.10) 18px, rgba(255,255,255,0.10) 24px),
+    /* 深色斑点(阴影) */
+    repeating-linear-gradient(-45deg,
+      transparent 0px, transparent 22px,
+      rgba(0,0,0,0.18) 22px, rgba(0,0,0,0.18) 28px),
+    /* 基底石色 */
+    linear-gradient(135deg, #A1887F 0%, #8D6E63 50%, #6D4C41 100%);
+  border-top: 10px solid #D7CCC8;
+  border-left: 10px solid #D7CCC8;
+  border-right: 10px solid #4E342E;
+  border-bottom: 10px solid #4E342E;
+  box-sizing: border-box;
+  transition: transform 0.1s, opacity 0.4s;
 }
 .ck-ore.shake { animation: ck-shake 0.25s; }
-.ck-ore.gone { opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+.ck-ore.gone { opacity: 0; pointer-events: none; }
 
 @keyframes ck-shake {
   0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(-3px, 2px); }
-  50% { transform: translate(3px, -2px); }
-  75% { transform: translate(-2px, -3px); }
+  25% { transform: translate(-4px, 3px); }
+  50% { transform: translate(4px, -3px); }
+  75% { transform: translate(-3px, -4px); }
 }
 
+/* strike 时飞出来的小石块(单个 1)。也用像素风,匹配大石头的肌理。 */
 .ck-ore-cube {
   width: 24px;
   height: 24px;
@@ -60,42 +76,83 @@
   border-left: 3px solid #BCAAA4;
   border-right: 3px solid #5D4037;
   border-bottom: 3px solid #5D4037;
-  margin: 0;
   box-sizing: border-box;
+  image-rendering: pixelated;
 }
 
 .ck-ore-label {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.78);
   color: white;
   font-family: 'Press Start 2P', monospace;
-  font-size: 28px;
-  padding: 4px 10px;
-  border: 2px solid #FFD54F;
+  font-size: 36px;
+  padding: 6px 14px;
+  border: 4px solid #FFD54F;
   text-shadow: 2px 2px 0 #000;
   pointer-events: none;
+  image-rendering: pixelated;
 }
 
-/* === 锤子 === */
-/* 静止时停在矿石右上方,稍微抬起,等待被点击。
-   strike 动画里挥下来再回去。 */
+/* === 像素风锤子(div 拼出来,不用 emoji) ===
+   静止时停在矿石右上方,稍微抬起,等待被点击。strike 动画里挥下来再回去。 */
 .ck-hammer {
   position: absolute;
-  top: 8px; right: 16px;
-  font-size: 56px;
-  transform-origin: bottom left;
-  transform: rotate(-30deg);
+  top: -8px;
+  right: 0;
+  width: 64px;
+  height: 96px;
+  transform-origin: 22px 88px; /* 大致是手柄末端,挥锤围这点转 */
+  transform: rotate(-32deg);
   pointer-events: none;
+  image-rendering: pixelated;
 }
+/* 锤头(石头) */
+.ck-hammer-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 44px;
+  background:
+    /* 横向阶梯让锤头看起来分层 */
+    linear-gradient(180deg,
+      #E0E0E0 0%, #E0E0E0 25%,
+      #9E9E9E 25%, #9E9E9E 60%,
+      #616161 60%, #616161 100%);
+  border-top: 5px solid #F5F5F5;
+  border-left: 5px solid #F5F5F5;
+  border-right: 5px solid #424242;
+  border-bottom: 5px solid #424242;
+  box-sizing: border-box;
+}
+/* 锤柄(木头) */
+.ck-hammer-handle {
+  position: absolute;
+  top: 38px;
+  left: 24px;
+  width: 14px;
+  height: 58px;
+  background:
+    linear-gradient(90deg,
+      #8D6E63 0%, #8D6E63 35%,
+      #5D4037 35%, #5D4037 70%,
+      #3E2723 70%, #3E2723 100%);
+  border-top: 3px solid #A1887F;
+  border-left: 3px solid #A1887F;
+  border-right: 3px solid #3E2723;
+  border-bottom: 3px solid #3E2723;
+  box-sizing: border-box;
+}
+
 .ck-hammer.strike {
   animation: ck-hammer-strike 0.25s ease-in-out;
 }
 @keyframes ck-hammer-strike {
-  0%   { transform: rotate(-30deg); }
-  50%  { transform: translate(-40%, 60%) rotate(60deg); }
-  100% { transform: rotate(-30deg); }
+  0%   { transform: rotate(-32deg); }
+  50%  { transform: rotate(70deg); }
+  100% { transform: rotate(-32deg); }
 }
 
 /* === 物品栏 === */
