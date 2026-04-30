@@ -31,10 +31,19 @@
   // ---- home ----
   function renderHome() {
     homeEl.innerHTML = '';
-    const wrap = el('div', { class: 'platform-home' });
-    wrap.appendChild(el('div', { class: 'platform-title' }, '⛏ 数学历险 ⛏'));
-    wrap.appendChild(el('div', { class: 'platform-subtitle' }, '挑一个游戏开始冒险'));
+    const wrap = el('div', { class: 'platform-home with-avatar' });
 
+    // 左侧角色位
+    const avatarSlot = el('div', { class: 'platform-avatar-slot' });
+    if (window.AvatarHomeTile) {
+      window.AvatarHomeTile.render(avatarSlot);
+    }
+    wrap.appendChild(avatarSlot);
+
+    // 右侧:原有标题 + 游戏网格 + 家长链接
+    const right = el('div', { class: 'platform-home-right' });
+    right.appendChild(el('div', { class: 'platform-title' }, '⛏ 数学历险 ⛏'));
+    right.appendChild(el('div', { class: 'platform-subtitle' }, '挑一个游戏开始冒险'));
     const grid = el('div', { class: 'game-grid' });
     (window.Games || []).forEach(g => {
       const card = el('div', {
@@ -45,13 +54,11 @@
       card.appendChild(el('div', { class: 'game-card-name' }, g.name));
       grid.appendChild(card);
     });
-    wrap.appendChild(grid);
+    right.appendChild(grid);
+    right.appendChild(el('a', { class: 'parent-link', href: '/dashboard' },
+      '👨‍👩‍👧 家长仪表盘'));
 
-    wrap.appendChild(el('a', {
-      class: 'parent-link',
-      href: '/dashboard',
-    }, '👨‍👩‍👧 家长仪表盘'));
-
+    wrap.appendChild(right);
     homeEl.appendChild(wrap);
   }
 
@@ -99,18 +106,40 @@
       mod.start(gameHostEl);
     },
 
+    enterShop() {
+      if (currentGameId) {
+        console.error('enterShop: a game is already active');
+        return;
+      }
+      if (!window.AvatarShop) {
+        console.error('enterShop: AvatarShop missing');
+        return;
+      }
+      currentGameId = '__shop__';
+      homeEl.classList.add('hidden');
+      gameHostEl.classList.add('active');
+      gameHostEl.innerHTML = '';
+      window.AvatarShop.start(gameHostEl);
+    },
+
     async exit() {
       if (!currentGameId) return;
-      const manifest = (window.Games || []).find(g => g.id === currentGameId);
-      const mod = manifest ? window[manifest.module] : null;
-      if (mod && typeof mod.exit === 'function') {
-        try { mod.exit(); } catch (e) { console.error('game exit error', e); }
+      if (currentGameId === '__shop__') {
+        try { window.AvatarShop?.exit(); } catch (e) { console.error('shop exit error', e); }
+      } else {
+        const manifest = (window.Games || []).find(g => g.id === currentGameId);
+        const mod = manifest ? window[manifest.module] : null;
+        if (mod && typeof mod.exit === 'function') {
+          try { mod.exit(); } catch (e) { console.error('game exit error', e); }
+        }
       }
       currentGameId = null;
       gameHostEl.innerHTML = '';
       gameHostEl.classList.remove('active');
       homeEl.classList.remove('hidden');
       await this.refreshTopbar();
+      // 同时把主页角色重新画一遍(装备可能变了)
+      renderHome();
     },
 
     async refreshTopbar() {
