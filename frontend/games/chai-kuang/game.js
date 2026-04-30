@@ -350,43 +350,84 @@
       }, i * COUNT_STEP_MS);
     });
 
-    // Phase B/C/D:数完 → 定格 → 白闪 → 合体飞走
+    // Phase B/C/D:数完 → 定格 → 白闪 → 暂停等用户点"收集整10"
     const phaseAEnd = 10 * COUNT_STEP_MS;
     setTimeout(() => {
       // Phase C: 全部白光闪一下
       cubes.forEach(c => c.classList.add('ck-merge-flash'));
 
       setTimeout(() => {
-        // Phase D: 移除这 10 个 cube,从原位置生成长条飞向十位区
-        const targetRect = tensArea.getBoundingClientRect();
+        // Phase D: 把 10 个 cube 替换为高亮长条 + 等用户点按钮
         const startRect = cubes[0].getBoundingClientRect();
         cubes.forEach(c => c.remove());
         onesCount -= 10;
         updateBinCounts();
 
-        const flyBar = R.renderBar('', 10);
-        flyBar.classList.add('ck-fly');
-        flyBar.style.position = 'fixed';
-        flyBar.style.left = startRect.left + 'px';
-        flyBar.style.top = startRect.top + 'px';
-        document.body.appendChild(flyBar);
+        // 高亮脉冲长条放在原位
+        const bar = R.renderBar('', 10);
+        bar.classList.add('ck-collect-bar');
+        bar.style.left = startRect.left + 'px';
+        bar.style.top = startRect.top + 'px';
+        document.body.appendChild(bar);
 
-        const tx = targetRect.left + targetRect.width / 2 - startRect.left - 60;
-        const ty = targetRect.top + targetRect.height / 2 - startRect.top - 16;
+        // "收集整 10" 按钮浮在长条上方
+        const btn = el('button', { class: 'ck-collect-btn' }, '📦 收集整 10');
+        btn.style.left = (startRect.left - 18) + 'px';
+        btn.style.top = (startRect.top - 64) + 'px';
+        document.body.appendChild(btn);
 
-        requestAnimationFrame(() => {
-          flyBar.style.transition = 'transform ' + MERGE_FLY_MS + 'ms ease-in-out';
-          flyBar.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
-        });
+        // 退出游戏时(中途按"我玩够了")也要清理掉这两个浮窗
+        let collected = false;
+        const cleanup = () => {
+          bar.remove();
+          btn.remove();
+        };
+        listenerCleanups.push(cleanup);
 
-        setTimeout(() => {
-          flyBar.remove();
-          tensCount++;
-          tensArea.appendChild(R.renderBar('', 10));
-          updateBinCounts();
-          // 可能还有 ≥10 个剩,递归继续
-          checkAutoMerge(done);
-        }, MERGE_FLY_MS);
+        btn.onclick = () => {
+          if (collected) return;
+          collected = true;
+          Audio.correct();
+          btn.remove();
+
+          // 长条不再脉冲,改为飞行
+          bar.classList.remove('ck-collect-bar');
+          bar.classList.add('ck-fly');
+
+          const tensAreaNow = document.getElementById('ck-tens-area');
+          if (!tensAreaNow) {
+            // host 已经被卸载(用户中途退出),直接结束
+            bar.remove();
+            checkAutoMerge(done);
+            return;
+          }
+          const targetRect = tensAreaNow.getBoundingClientRect();
+          const tx = targetRect.left + targetRect.width / 2 - startRect.left - 60;
+          const ty = targetRect.top + targetRect.height / 2 - startRect.top - 16;
+
+          requestAnimationFrame(() => {
+            bar.style.transition = 'transform ' + MERGE_FLY_MS + 'ms ease-in-out';
+            bar.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+          });
+
+          // 在长条原位浮出 "+1 个十!" 奖励飘字
+          const reward = el('div', { class: 'ck-reward-pop' }, '+1 个十!');
+          reward.style.left = (startRect.left + 10) + 'px';
+          reward.style.top = startRect.top + 'px';
+          document.body.appendChild(reward);
+          setTimeout(() => reward.remove(), 1300);
+
+          setTimeout(() => {
+            bar.remove();
+            tensCount++;
+            const tensAreaLater = document.getElementById('ck-tens-area');
+            if (tensAreaLater) tensAreaLater.appendChild(R.renderBar('', 10));
+            updateBinCounts();
+            // 个位还有 ≥10 时继续(罕见,但 Phase D 期间没新方块进来,
+            // 只可能是合体前就已经超过 10 的情况)
+            checkAutoMerge(done);
+          }, MERGE_FLY_MS);
+        };
       }, MERGE_FLASH_MS);
     }, phaseAEnd + COUNT_HOLD_MS);
   }

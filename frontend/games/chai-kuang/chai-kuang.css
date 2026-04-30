@@ -286,6 +286,67 @@
   100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); filter: brightness(1); }
 }
 
+/* 凑十后等待"收集整10"的高亮长条:脉冲缩放 + 金光环 */
+.ck-collect-bar {
+  position: fixed;
+  z-index: 20;
+  filter: brightness(1.3) drop-shadow(0 0 14px rgba(255, 213, 79, 0.95));
+  animation: ck-collect-pulse 0.9s ease-in-out infinite;
+}
+@keyframes ck-collect-pulse {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.1); }
+}
+
+/* "收集整10" 按钮,跳跃吸引注意 */
+.ck-collect-btn {
+  position: fixed;
+  z-index: 21;
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 22px;
+  padding: 10px 22px;
+  background: #FFA000;
+  color: white;
+  border-top: 4px solid #FFD54F;
+  border-left: 4px solid #FFD54F;
+  border-right: 4px solid #FF6F00;
+  border-bottom: 4px solid #FF6F00;
+  cursor: pointer;
+  text-shadow: 2px 2px 0 #5D4037;
+  white-space: nowrap;
+  animation: ck-collect-bounce 0.55s ease-in-out infinite alternate;
+  font-family: inherit;
+}
+.ck-collect-btn:active { transform: translate(2px, 2px); }
+@keyframes ck-collect-bounce {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-7px); }
+}
+
+/* 收集后的奖励飘字("+1 个十!") */
+.ck-reward-pop {
+  position: fixed;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 24px;
+  color: #FFD54F;
+  text-shadow:
+    3px 3px 0 #5D4037,
+   -2px -2px 0 #5D4037,
+    2px -2px 0 #5D4037,
+   -2px 2px 0 #5D4037,
+    0 0 14px rgba(255, 215, 0, 0.95);
+  pointer-events: none;
+  z-index: 60;
+  animation: ck-reward-pop-anim 1.3s ease-out forwards;
+  white-space: nowrap;
+  image-rendering: pixelated;
+}
+@keyframes ck-reward-pop-anim {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  20%  { opacity: 1; transform: translateY(-12px) scale(1.4); }
+  100% { opacity: 0; transform: translateY(-100px) scale(1.0); }
+}
+
 /* 旧的 glow class,仍保留供 Task 12 答错闪提示用 */
 .ck-merge-glow {
   animation: ck-glow 0.2s ease-out;
