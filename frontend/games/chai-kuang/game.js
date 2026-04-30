@@ -19,6 +19,11 @@
   const QUESTION_TYPES = ['observe', 'decompose', 'compose'];
   let currentQuestion = null;
   let questionStartTime = 0;
+  // === decompose 题输入态 ===
+  let decomposeInput = { tens: '', ones: '', activeSlot: 'tens' };
+  let decomposeAttempt = 0;          // 0 = 还没答过;1 = 错过一次;2 = 错两次,显示答案
+  // === compose 题输入态(Task 13 用到) ===
+  let composeInput = '';
   // oreRemaining/tensCount/onesCount 由 nextQuestion 根据 currentQuestion.number 重置。
   // 保留导出以便 strikeOre/flyCubes/checkAutoMerge 直接读写。
   let oreRemaining = 0;
@@ -215,11 +220,167 @@
         panel.appendChild(el('div', null,
           '🔨 把矿石敲完,然后填出它有几个十、几个一'));
       } else {
-        // decompose 完成态:Task 12 接输入区
-        panel.appendChild(el('div', null, '敲完啦!Task 12 会在这里加输入框'));
+        const row = el('div', { class: 'ck-input-row' });
+        row.appendChild(el('span', null, '它有'));
+        row.appendChild(makeSlot('tens'));
+        row.appendChild(el('span', null, '个十,'));
+        row.appendChild(makeSlot('ones'));
+        row.appendChild(el('span', null, '个一'));
+        panel.appendChild(row);
+        panel.appendChild(renderKeypad('decompose'));
       }
     }
     return panel;
+  }
+
+  function makeSlot(name) {
+    const v = decomposeInput[name];
+    return el('div', {
+      class: 'ck-input-slot ' + (v === '' ? 'empty' : '')
+              + (decomposeInput.activeSlot === name ? ' active' : ''),
+      id: 'ck-slot-' + name,
+      onclick: () => {
+        decomposeInput.activeSlot = name;
+        refreshSlots();
+      },
+    }, v === '' ? '?' : v);
+  }
+
+  function refreshSlots() {
+    ['tens', 'ones'].forEach(name => {
+      const e = document.getElementById('ck-slot-' + name);
+      if (!e) return;
+      const v = decomposeInput[name];
+      e.textContent = v === '' ? '?' : v;
+      e.classList.toggle('empty', v === '');
+      e.classList.toggle('active', decomposeInput.activeSlot === name);
+    });
+  }
+
+  function renderKeypad(mode) {
+    // mode: 'decompose'(单数字填十位/个位) 或 'compose'(两位数)
+    const pad = el('div', { class: 'ck-keypad' });
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].forEach(n => {
+      pad.appendChild(el('button', { onclick: () => onKey(mode, n) }, n));
+    });
+    pad.appendChild(el('button', { class: 'delete', onclick: () => onDel(mode) }, '⌫'));
+    pad.appendChild(el('button', { class: 'submit', onclick: () => onKeyPadSubmit(mode) }, '✓'));
+    return pad;
+  }
+
+  function onKey(mode, n) {
+    Audio.key();
+    if (mode === 'decompose') {
+      const slot = decomposeInput.activeSlot;
+      decomposeInput[slot] = n;
+      // 自动跳到下一格
+      if (slot === 'tens') decomposeInput.activeSlot = 'ones';
+      refreshSlots();
+    } else if (mode === 'compose') {
+      if (composeInput.length >= 2) return;
+      composeInput += n;
+      refreshComposeDisplay();
+    }
+  }
+
+  function onDel(mode) {
+    Audio.key();
+    if (mode === 'decompose') {
+      const slot = decomposeInput.activeSlot;
+      if (decomposeInput[slot] !== '') {
+        decomposeInput[slot] = '';
+      } else if (slot === 'ones') {
+        decomposeInput.activeSlot = 'tens';
+      }
+      refreshSlots();
+    } else if (mode === 'compose') {
+      composeInput = composeInput.slice(0, -1);
+      refreshComposeDisplay();
+    }
+  }
+
+  async function onKeyPadSubmit(mode) {
+    if (mode === 'decompose') {
+      if (decomposeInput.tens === '' || decomposeInput.ones === '') return;
+      await submitDecomposeAttempt();
+    } else if (mode === 'compose') {
+      if (composeInput.length < 1) return;
+      await submitComposeAttempt();
+    }
+  }
+
+  // Task 13 占位 - compose 题输入提交
+  function refreshComposeDisplay() {
+    const e = document.getElementById('ck-compose-display');
+    if (e) e.textContent = composeInput === '' ? '?' : composeInput;
+  }
+  async function submitComposeAttempt() {
+    // Task 13 实装
+  }
+
+  // === decompose 提交 + 反馈逻辑 ===
+
+  async function submitDecomposeAttempt() {
+    const result = await submitCurrentAnswer({
+      user_tens: parseInt(decomposeInput.tens, 10),
+      user_ones: parseInt(decomposeInput.ones, 10),
+    });
+    if (!result) return;
+
+    if (result.correct) {
+      Audio.correct();
+      if (result.new_badges && result.new_badges.length > 0) Audio.levelUp();
+      showCelebration(result, () => nextQuestion());
+      return;
+    }
+
+    // 答错
+    Audio.wrong();
+    decomposeAttempt++;
+    flashHintBars();
+
+    if (decomposeAttempt >= 2) {
+      // 第二次错:显示正确答案,然后下一题(不再发请求)
+      showRevealAndNext(result);
+    } else {
+      // 第一次错:清空输入让孩子重答
+      decomposeInput = { tens: '', ones: '', activeSlot: 'tens' };
+      refreshSlots();
+    }
+  }
+
+  function flashHintBars() {
+    // 让物品栏的长条/方块短暂闪一下作为提示
+    document.querySelectorAll(
+      '#ck-tens-area .bar-block, #ck-ones-area .single-cube'
+    ).forEach(e => {
+      e.classList.add('ck-merge-glow');
+      setTimeout(() => e.classList.remove('ck-merge-glow'), 240);
+    });
+  }
+
+  function showRevealAndNext(result) {
+    const overlay = el('div', { class: 'ck-celebrate-overlay' });
+    const card = el('div', { class: 'ck-celebrate-card', style:
+      'background:#FFD54F;color:#5D4037;text-shadow:none;' +
+      'border-top-color:#FFE082;border-left-color:#FFE082;' +
+      'border-right-color:#FFA000;border-bottom-color:#FFA000;'
+    });
+    card.appendChild(el('div', { class: 'ck-celebrate-emoji' }, '👀'));
+    card.appendChild(el('div', { class: 'ck-celebrate-eq' },
+      '正确答案是: ' + result.expected_tens + ' 个十,' +
+      result.expected_ones + ' 个一'));
+    card.appendChild(el('div', {
+      style: 'font-size:16px;color:#5D4037;margin-top:6px;',
+    }, '没关系,下一道继续'));
+    const btn = el('button', {
+      class: 'ck-celebrate-btn',
+      onclick: () => { overlay.remove(); nextQuestion(); },
+    }, '▶ 继续');
+    card.appendChild(btn);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    listenerCleanups.push(() => overlay.remove());
   }
 
   // compose 题屏占位(Task 13 实装真正 UI)
@@ -250,11 +411,17 @@
     onesCount = 0;
     isHammering = false;
     onOreFinished = null;
+    // 重置题型输入态
+    decomposeInput = { tens: '', ones: '', activeSlot: 'tens' };
+    decomposeAttempt = 0;
+    composeInput = '';
     // 按题型挂上"敲完矿石"回调
     if (currentQuestion.type === 'observe') {
       onOreFinished = finalizeObserve;
+    } else if (currentQuestion.type === 'decompose') {
+      onOreFinished = () => render();   // 敲完后重渲染,renderQuestionPanel 自然切换到输入区
     }
-    // decompose 在 Task 12 挂;compose 不走敲矿流程
+    // compose 不走敲矿流程
     render();
   }
 
