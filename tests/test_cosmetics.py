@@ -83,3 +83,30 @@ def test_state_returns_cosmetics_fields(client):
     assert data["equipped_cosmetics"] == {
         "head": None, "top": None, "hand": None, "legs": None
     }
+
+
+def test_set_equipped_assigns_slot(client):
+    """set_equipped 设置槽位,get_player_state 读出。"""
+    from backend import db
+    # 先把 princess_crown 加进 owned (绕过 buy 直接构造状态)
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET owned_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]',)
+        )
+    db.set_equipped("head", "princess_crown")
+    state = db.get_player_state()
+    assert state["equipped_cosmetics"]["head"] == "princess_crown"
+
+
+def test_set_equipped_clears_slot(client):
+    """set_equipped(slot, None) 清空槽位。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET owned_cosmetics = ?, equipped_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]', '{"head": "princess_crown"}')
+        )
+    db.set_equipped("head", None)
+    state = db.get_player_state()
+    assert state["equipped_cosmetics"]["head"] is None

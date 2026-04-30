@@ -209,6 +209,24 @@ def update_player_state(
             c.execute("UPDATE player_state SET badges = ? WHERE id = 1", (badges_json,))
 
 
+def set_equipped(slot: str, cosmetic_id: str | None) -> None:
+    """更新 player_state.equipped_cosmetics 的某个槽位。
+
+    不校验所有权或 slot 归属,调用方(api 层)负责校验。
+    """
+    with get_conn() as conn:
+        c = conn.cursor()
+        row = c.execute(
+            "SELECT equipped_cosmetics FROM player_state WHERE id = 1"
+        ).fetchone()
+        equipped = json.loads(row["equipped_cosmetics"] or "{}")
+        equipped[slot] = cosmetic_id
+        c.execute(
+            "UPDATE player_state SET equipped_cosmetics = ? WHERE id = 1",
+            (json.dumps(equipped),),
+        )
+
+
 # ============== 答题记录 ==============
 
 def log_answer(
