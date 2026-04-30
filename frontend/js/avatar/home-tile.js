@@ -31,7 +31,7 @@
       tile.innerHTML = window.Avatar.render(equipped);
       // 装饰:像素蝴蝶结 + 四角珍珠
       const ribbon = el('div', { class: 'avatar-frame-ribbon' });
-      ribbon.appendChild(el('span', { class: 'knot' }));
+      ribbon.appendChild(el('span', { class: 'avatar-frame-ribbon-knot' }));
       tile.appendChild(ribbon);
       ['p1', 'p2', 'p3', 'p4'].forEach(pos => {
         tile.appendChild(el('span', { class: 'avatar-frame-pearl ' + pos }));
