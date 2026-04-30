@@ -230,6 +230,63 @@
   100% { opacity: 0; transform: translateY(-90px) scale(0.9); }
 }
 
+/* 凑十数数:每个方块依次脉冲高亮(金边 + 放大 + 黄光) */
+.ck-merge-count {
+  animation: ck-count-pulse 0.32s ease-out;
+  position: relative;
+  z-index: 5;
+}
+@keyframes ck-count-pulse {
+  0%   { transform: scale(1.0); box-shadow: 0 0 0 rgba(255, 213, 79, 0); }
+  40%  { transform: scale(1.4); box-shadow: 0 0 16px 8px rgba(255, 213, 79, 0.95); }
+  100% { transform: scale(1.15); box-shadow: 0 0 6px 3px rgba(255, 213, 79, 0.6); }
+}
+/* 数到 10 后保持"已点亮"状态(金边),等合体白闪 */
+.ck-merge-counted {
+  outline: 3px solid #FFD54F;
+  outline-offset: -3px;
+  box-shadow: 0 0 8px 3px rgba(255, 213, 79, 0.5);
+}
+
+/* 数数时方块上方浮出的 "1"、"2"…"10!" 像素字 */
+.ck-count-pop {
+  position: fixed;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  color: #FFEB3B;
+  text-shadow:
+    2px 2px 0 #5D4037,
+   -2px -2px 0 #5D4037,
+    2px -2px 0 #5D4037,
+   -2px 2px 0 #5D4037,
+    0 0 8px rgba(255, 235, 59, 0.7);
+  pointer-events: none;
+  z-index: 60;
+  animation: ck-count-pop-anim 0.9s ease-out forwards;
+  image-rendering: pixelated;
+  white-space: nowrap;
+}
+.ck-count-pop.final {
+  font-size: 26px;
+  color: #FFEB3B;
+}
+@keyframes ck-count-pop-anim {
+  0%   { opacity: 0; transform: translateY(0) scale(0.4); }
+  20%  { opacity: 1; transform: translateY(-10px) scale(1.3); }
+  100% { opacity: 0; transform: translateY(-36px) scale(1.0); }
+}
+
+/* 合体白闪(10 个全部点亮后一起白光闪一下) */
+.ck-merge-flash {
+  animation: ck-merge-flash-anim 0.25s ease-out;
+}
+@keyframes ck-merge-flash-anim {
+  0%   { box-shadow: 0 0 0 rgba(255, 255, 255, 0); filter: brightness(1); }
+  50%  { box-shadow: 0 0 28px 12px rgba(255, 255, 255, 0.95); filter: brightness(2); }
+  100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); filter: brightness(1); }
+}
+
+/* 旧的 glow class,仍保留供 Task 12 答错闪提示用 */
 .ck-merge-glow {
   animation: ck-glow 0.2s ease-out;
 }

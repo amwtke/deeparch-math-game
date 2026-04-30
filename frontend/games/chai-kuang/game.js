@@ -304,8 +304,16 @@
     }
   }
 
-  // 检查个位区有没有 ≥10 个方块,凑足就闪光 + 飞向十位区合体为 1 长条。
-  // 可能连续触发(例如一锤之后个位 12 个 → 合一次还剩 2)。
+  // 凑十的"教学慢动作"。四阶段:
+  //   A) 数数:10 个 cube 一个个脉冲高亮,上方浮出 1, 2, ..., 10!
+  //   B) 凝聚定格:全部点亮,等一下让孩子看清"有 10 个"
+  //   C) 合体白闪:全部白光闪一下
+  //   D) 飞走变长条:从个位区飞到十位区,落地为一根新长条
+  // 个位 ≥10 时触发,可能连续(例如刚敲完一锤 12 个 → 合一次还剩 2)。
+  const COUNT_STEP_MS = 130;          // A 阶段:每个 cube 间隔
+  const COUNT_HOLD_MS = 280;          // B 阶段:数完后停留
+  const MERGE_FLASH_MS = 250;         // C 阶段:白闪持续
+
   function checkAutoMerge(done) {
     if (onesCount < 10) { if (done) done(); return; }
     const onesArea = document.getElementById('ck-ones-area');
@@ -315,42 +323,72 @@
     const cubes = Array.from(onesArea.querySelectorAll('.single-cube')).slice(0, 10);
     if (cubes.length < 10) { if (done) done(); return; }
 
-    // Step 1: 整组金光闪
-    cubes.forEach(c => c.classList.add('ck-merge-glow'));
-    Audio.merge();
+    // Phase A:每隔 COUNT_STEP_MS 点亮一个 cube,上方浮出数字
+    cubes.forEach((cube, i) => {
+      setTimeout(() => {
+        cube.classList.add('ck-merge-count');
+        // 一过 pulse 动画就标"已点亮"(留个金边)
+        setTimeout(() => {
+          cube.classList.remove('ck-merge-count');
+          cube.classList.add('ck-merge-counted');
+        }, 320);
 
+        // 浮字 1..9 用普通字号,10 用 final 大字号 + 加感叹号
+        const isFinal = (i === 9);
+        const r = cube.getBoundingClientRect();
+        const popClass = 'ck-count-pop' + (isFinal ? ' final' : '');
+        const pop = el('div', { class: popClass }, isFinal ? '10!' : String(i + 1));
+        const popOffset = isFinal ? 18 : 10;
+        pop.style.left = (r.left + r.width / 2 - popOffset) + 'px';
+        pop.style.top = (r.top - 14) + 'px';
+        document.body.appendChild(pop);
+        setTimeout(() => pop.remove(), 900);
+
+        // 音效:数到 1-9 用 key("嗒"),数到 10 用 merge("嗡!")
+        if (isFinal) Audio.merge();
+        else Audio.key();
+      }, i * COUNT_STEP_MS);
+    });
+
+    // Phase B/C/D:数完 → 定格 → 白闪 → 合体飞走
+    const phaseAEnd = 10 * COUNT_STEP_MS;
     setTimeout(() => {
-      // Step 2: 把这 10 个移除,飞向十位区,合体为 1 根长条
-      const targetRect = tensArea.getBoundingClientRect();
-      const startRect = cubes[0].getBoundingClientRect();
-      cubes.forEach(c => c.remove());
-      onesCount -= 10;
-      updateBinCounts();
-
-      const flyBar = R.renderBar('', 10);
-      flyBar.classList.add('ck-fly');
-      flyBar.style.position = 'fixed';
-      flyBar.style.left = startRect.left + 'px';
-      flyBar.style.top = startRect.top + 'px';
-      document.body.appendChild(flyBar);
-
-      const tx = targetRect.left + targetRect.width / 2 - startRect.left - 60;
-      const ty = targetRect.top + targetRect.height / 2 - startRect.top - 16;
-
-      requestAnimationFrame(() => {
-        flyBar.style.transition = 'transform ' + MERGE_FLY_MS + 'ms ease-in-out';
-        flyBar.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
-      });
+      // Phase C: 全部白光闪一下
+      cubes.forEach(c => c.classList.add('ck-merge-flash'));
 
       setTimeout(() => {
-        flyBar.remove();
-        tensCount++;
-        tensArea.appendChild(R.renderBar('', 10));
+        // Phase D: 移除这 10 个 cube,从原位置生成长条飞向十位区
+        const targetRect = tensArea.getBoundingClientRect();
+        const startRect = cubes[0].getBoundingClientRect();
+        cubes.forEach(c => c.remove());
+        onesCount -= 10;
         updateBinCounts();
-        // 可能还有 ≥10 个剩,继续递归
-        checkAutoMerge(done);
-      }, MERGE_FLY_MS);
-    }, MERGE_GLOW_MS);
+
+        const flyBar = R.renderBar('', 10);
+        flyBar.classList.add('ck-fly');
+        flyBar.style.position = 'fixed';
+        flyBar.style.left = startRect.left + 'px';
+        flyBar.style.top = startRect.top + 'px';
+        document.body.appendChild(flyBar);
+
+        const tx = targetRect.left + targetRect.width / 2 - startRect.left - 60;
+        const ty = targetRect.top + targetRect.height / 2 - startRect.top - 16;
+
+        requestAnimationFrame(() => {
+          flyBar.style.transition = 'transform ' + MERGE_FLY_MS + 'ms ease-in-out';
+          flyBar.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+        });
+
+        setTimeout(() => {
+          flyBar.remove();
+          tensCount++;
+          tensArea.appendChild(R.renderBar('', 10));
+          updateBinCounts();
+          // 可能还有 ≥10 个剩,递归继续
+          checkAutoMerge(done);
+        }, MERGE_FLY_MS);
+      }, MERGE_FLASH_MS);
+    }, phaseAEnd + COUNT_HOLD_MS);
   }
 
   function render() {
