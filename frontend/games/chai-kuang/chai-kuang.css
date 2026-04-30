@@ -1,2 +1,221 @@
 /* === 矿石分解大师 - 游戏专属样式 === */
-/* 后续在 Task 9-12 里逐步填充 */
+
+.ck-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  position: relative;
+}
+
+.ck-exit {
+  align-self: flex-start;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: 2px solid white;
+  font-size: 14px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* === 矿石区 === */
+.ck-ore-area {
+  flex: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 180px;
+}
+
+.ck-ore {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s;
+  user-select: none;
+}
+.ck-ore.shake { animation: ck-shake 0.25s; }
+.ck-ore.gone { opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+
+@keyframes ck-shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3px, 2px); }
+  50% { transform: translate(3px, -2px); }
+  75% { transform: translate(-2px, -3px); }
+}
+
+.ck-ore-cube {
+  width: 12px;
+  height: 12px;
+  background: #8D6E63;
+  border-top: 2px solid #BCAAA4;
+  border-left: 2px solid #BCAAA4;
+  border-right: 2px solid #5D4037;
+  border-bottom: 2px solid #5D4037;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.ck-ore-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 36px;
+  padding: 6px 14px;
+  border: 3px solid #FFD54F;
+  text-shadow: 2px 2px 0 #000;
+  pointer-events: none;
+}
+
+/* === 锤子 === */
+.ck-hammer {
+  position: absolute;
+  top: 0; right: 8px;
+  font-size: 48px;
+  transform-origin: bottom left;
+  transform: translate(0, -120%) rotate(-30deg);
+  pointer-events: none;
+}
+.ck-hammer.strike {
+  animation: ck-hammer-strike 0.25s ease-in-out;
+}
+@keyframes ck-hammer-strike {
+  0%   { transform: translate(0, -120%) rotate(-30deg); }
+  50%  { transform: translate(-40%, -10%) rotate(40deg); }
+  100% { transform: translate(0, -120%) rotate(-30deg); }
+}
+
+/* === 物品栏 === */
+.ck-inventory {
+  display: flex;
+  border-top: 4px solid #5D4037;
+  background: rgba(255, 255, 255, 0.85);
+  min-height: 180px;
+}
+.ck-bin {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+.ck-bin + .ck-bin {
+  border-left: 4px solid #5D4037;
+}
+.ck-bin-label {
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 22px;
+  color: #5D4037;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.ck-bin-label .sub {
+  display: block;
+  font-size: 13px;
+  color: #8D6E63;
+}
+.ck-bin-area {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+}
+
+/* 长条样式复用 .bar-block,但分解游戏里色调与 cou-shi 不同,加修饰类 */
+.ck-bin-area .bar-block { margin: 2px; }
+
+/* === 飞行中的方块/长条 === */
+.ck-fly {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  transition: transform 0.4s ease-in, opacity 0.4s;
+}
+
+.ck-merge-glow {
+  animation: ck-glow 0.2s ease-out;
+}
+@keyframes ck-glow {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.0); }
+  50%  { box-shadow: 0 0 16px 8px rgba(255, 215, 0, 0.9); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.0); }
+}
+
+/* === 题目区 === */
+.ck-question {
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid #5D4037;
+  padding: 10px;
+  margin-top: 8px;
+  text-align: center;
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 18px;
+  color: #5D4037;
+}
+
+.ck-input-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.ck-input-slot {
+  display: inline-block;
+  min-width: 48px;
+  height: 48px;
+  line-height: 48px;
+  background: white;
+  border: 3px solid #5D4037;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  color: #2E7D32;
+  cursor: pointer;
+  text-align: center;
+  padding: 0 8px;
+}
+.ck-input-slot.active {
+  border-color: #FFD54F;
+  box-shadow: 0 0 0 3px rgba(255, 213, 79, 0.5) inset;
+}
+.ck-input-slot.empty { color: #BDBDBD; }
+.ck-input-slot.flash { animation: ck-flash 0.3s; }
+@keyframes ck-flash {
+  0%, 100% { background: white; }
+  50% { background: #FFE082; }
+}
+
+.ck-keypad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.ck-keypad button {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  padding: 12px 0;
+  background: #FFA000;
+  color: white;
+  border-top: 3px solid #FFD54F;
+  border-left: 3px solid #FFD54F;
+  border-right: 3px solid #FF8F00;
+  border-bottom: 3px solid #FF8F00;
+  cursor: pointer;
+}
+.ck-keypad button:active { transform: translate(2px, 2px); }
+.ck-keypad button.delete { background: #757575; border-color: #BDBDBD #BDBDBD #424242 #424242; }
+.ck-keypad button.submit { background: #2E7D32; border-color: #66BB6A #66BB6A #1B5E20 #1B5E20; }
