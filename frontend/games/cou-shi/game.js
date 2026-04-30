@@ -9,16 +9,8 @@
 const DAILY_TARGET = 10;
 const SESSION_LENGTH = 10;  // 每局多少题
 
-const BADGE_DEFS = [
-  { key: 'first_correct', icon: '⭐', name: '初出茅庐' },
-  { key: 'combo_5', icon: '🔥', name: '连击5' },
-  { key: 'combo_10', icon: '⚡', name: '连击10' },
-  { key: 'daily_done', icon: '📅', name: '完成每日' },
-  { key: 'diamond_master', icon: '💎', name: '钻石大师' },
-  { key: 'week_warrior', icon: '🏆', name: '一周勇士' },
-  { key: 'no_hint', icon: '🧠', name: '独立思考' },
-  { key: 'speed_demon', icon: '🚀', name: '闪电速答' },
-];
+// 勋章定义现在在 frontend/js/badges.js,跨游戏共享。BADGE_DEFS 只读 alias。
+const BADGE_DEFS = window.BadgeDefs;
 
 // ============== 状态 ==============
 let currentCombo = 0;

@@ -103,3 +103,11 @@
 .game-host > .screen {
   flex: 1;
 }
+
+.game-card.orange {
+  background: var(--gold, #FFA000);
+  border-top-color: #FFD54F;
+  border-left-color: #FFD54F;
+  border-right-color: #FF8F00;
+  border-bottom-color: #FF8F00;
+}

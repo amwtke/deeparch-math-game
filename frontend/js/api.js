@@ -22,6 +22,7 @@ async function apiPost(path, body) {
 const Api = {
   getState: () => apiGet('/api/state'),
   submitAnswer: (payload) => apiPost('/api/answer', payload),
+  submitDecomposeAnswer: (payload) => apiPost('/api/decompose/answer', payload),
   getStats: (days = 30) => apiGet(`/api/stats?days=${days}`),
   reset: () => apiPost('/api/reset'),
 };

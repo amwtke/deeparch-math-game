@@ -7,7 +7,10 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from . import db
-from .models import AnswerResult, AnswerSubmit, PlayerState, StatsResponse
+from .models import (
+    AnswerResult, AnswerSubmit, PlayerState, StatsResponse,
+    DecomposeAnswerSubmit, DecomposeAnswerResult,
+)
 
 router = APIRouter(prefix="/api")
 
@@ -129,3 +132,69 @@ def reset() -> dict:
     """开发用:清空所有数据。"""
     db.reset_all()
     return {"ok": True, "message": "数据已清空"}
+
+
+@router.post("/decompose/answer", response_model=DecomposeAnswerResult)
+def submit_decompose_answer(payload: DecomposeAnswerSubmit) -> DecomposeAnswerResult:
+    """提交分解游戏一道题。后端判对错并更新状态。"""
+    expected_tens = payload.number // 10
+    expected_ones = payload.number % 10
+
+    if payload.question_type == "observe":
+        correct = True
+    elif payload.question_type == "decompose":
+        correct = (payload.user_tens == expected_tens
+                   and payload.user_ones == expected_ones)
+    elif payload.question_type == "compose":
+        correct = (payload.user_number == payload.number)
+    else:
+        # Pydantic pattern 已挡掉,兜底
+        correct = False
+
+    db.log_decompose_answer(
+        number=payload.number,
+        question_type=payload.question_type,
+        user_tens=payload.user_tens,
+        user_ones=payload.user_ones,
+        user_number=payload.user_number,
+        correct=correct,
+        elapsed_ms=payload.elapsed_ms,
+    )
+
+    coins = 1 if correct else 0
+    if coins:
+        db.update_player_state(coins_delta=coins, correct_delta=1, answered_delta=1)
+    else:
+        db.update_player_state(answered_delta=1)
+
+    state = db.get_player_state()
+    new_badges = check_decompose_badges(state=state)
+    if new_badges:
+        update = {key: True for key in new_badges}
+        db.update_player_state(answered_delta=0, badges_update=update)
+        state = db.get_player_state()
+
+    return DecomposeAnswerResult(
+        correct=correct,
+        expected_tens=expected_tens,
+        expected_ones=expected_ones,
+        coins_earned=coins,
+        new_badges=new_badges,
+        today_done=state["today_done"],
+        daily_target_reached=state["today_done"] >= DAILY_TARGET,
+    )
+
+
+def check_decompose_badges(state: dict) -> list[str]:
+    """返回这次答题新解锁的分解游戏勋章 key 列表。"""
+    badges = state["badges"]
+    newly = []
+
+    def check(key: str, condition: bool):
+        if condition and not badges.get(key, False):
+            newly.append(key)
+
+    check("decompose_50", db.get_decompose_total_count() >= 50)
+    check("decompose_streak_5", db.get_decompose_streak() >= 5)
+    check("compose_perfect_10", db.get_compose_correct_count() >= 10)
+    return newly

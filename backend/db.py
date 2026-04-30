@@ -24,6 +24,9 @@ BADGE_KEYS = [
     "week_warrior",
     "no_hint",
     "speed_demon",
+    "decompose_50",
+    "decompose_streak_5",
+    "compose_perfect_10",
 ]
 
 
@@ -70,6 +73,21 @@ def init_db() -> None:
             questions_done INTEGER DEFAULT 0,
             correct_count INTEGER DEFAULT 0
         );
+
+        CREATE TABLE IF NOT EXISTS decompose_answers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            number INTEGER NOT NULL,
+            question_type TEXT NOT NULL,
+            user_tens INTEGER,
+            user_ones INTEGER,
+            user_number INTEGER,
+            correct INTEGER NOT NULL,
+            elapsed_ms INTEGER,
+            created_at TEXT DEFAULT (datetime('now', 'localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_decompose_created ON decompose_answers(created_at);
+        CREATE INDEX IF NOT EXISTS idx_decompose_type ON decompose_answers(question_type);
 
         CREATE INDEX IF NOT EXISTS idx_answers_created ON answers(created_at);
         CREATE INDEX IF NOT EXISTS idx_answers_correct ON answers(correct);
@@ -124,11 +142,16 @@ def update_player_state(
     *,
     coins_delta: int = 0,
     correct_delta: int = 0,
-    answered_delta: int = 1,
+    answered_delta: int = 0,
     new_best_combo: int | None = None,
     badges_update: dict[str, bool] | None = None,
 ) -> None:
-    """增量更新玩家状态。"""
+    """增量更新玩家状态。所有 delta 默认 0,调用方必须显式传想增加的字段。
+
+    历史上 answered_delta 默认 1 是个隐患:某次"只为写勋章"的更新如果忘了
+    显式传 answered_delta=0,会被静默多记一次答题。改默认 0 之后,所有
+    delta 一致,需要 +1 时调用方写明。
+    """
     with get_conn() as conn:
         c = conn.cursor()
         if badges_update:
@@ -258,6 +281,80 @@ def reset_all() -> None:
     with get_conn() as conn:
         c = conn.cursor()
         c.execute("DELETE FROM answers")
+        c.execute("DELETE FROM decompose_answers")
         c.execute("DELETE FROM daily_log")
         c.execute("UPDATE player_state SET total_coins=0, total_correct=0, "
                   "total_answered=0, best_combo=0, badges='{}' WHERE id=1")
+
+
+# ============== 分解游戏 (chai-kuang) ==============
+
+def log_decompose_answer(
+    *,
+    number: int,
+    question_type: str,
+    user_tens: int | None,
+    user_ones: int | None,
+    user_number: int | None,
+    correct: bool,
+    elapsed_ms: int,
+) -> None:
+    """记录分解游戏的一道答题,同时写入共享 daily_log。"""
+    today = today_str()
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute(
+            """INSERT INTO decompose_answers
+               (number, question_type, user_tens, user_ones, user_number,
+                correct, elapsed_ms)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (number, question_type, user_tens, user_ones, user_number,
+             int(correct), elapsed_ms),
+        )
+        c.execute(
+            """INSERT INTO daily_log (date, questions_done, correct_count)
+               VALUES (?, 1, ?)
+               ON CONFLICT(date) DO UPDATE SET
+                 questions_done = questions_done + 1,
+                 correct_count = correct_count + ?""",
+            (today, int(correct), int(correct)),
+        )
+
+
+def get_decompose_total_count() -> int:
+    """累计敲过多少颗矿石(=分解游戏总答题数,无论题型/对错)。"""
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM decompose_answers"
+        ).fetchone()
+    return row["n"]
+
+
+def get_decompose_streak() -> int:
+    """最近一段连续答对的 'decompose' 题型数量(尾部连击)。
+
+    其它题型不打断也不计入(只看 decompose)。
+    """
+    with get_conn() as conn:
+        rows = conn.execute(
+            """SELECT correct FROM decompose_answers
+               WHERE question_type = 'decompose'
+               ORDER BY id DESC"""
+        ).fetchall()
+    streak = 0
+    for r in rows:
+        if r["correct"] == 1:
+            streak += 1
+        else:
+            break
+    return streak
+
+
+def get_compose_correct_count() -> int:
+    """compose 题型累计答对次数。"""
+    with get_conn() as conn:
+        row = conn.execute(
+            """SELECT COUNT(*) AS n FROM decompose_answers
+               WHERE question_type = 'compose' AND correct = 1"""
+        ).fetchone()
+    return row["n"]
