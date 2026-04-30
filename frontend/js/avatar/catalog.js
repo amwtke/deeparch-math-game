@@ -433,5 +433,179 @@
   <rect x="153" y="234" width="3" height="18" fill="#a05828"/>
 </g>`,
     },
+
+    denim_boots: {
+      slot: 'legs', name: '牛仔靴', price: 80,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="12" y="3" width="9" height="30" fill="#3a70b8"/>
+  <rect x="27" y="3" width="9" height="30" fill="#3a70b8"/>
+  <rect x="12" y="3" width="3" height="30" fill="#5a90d8"/>
+  <rect x="27" y="3" width="3" height="30" fill="#5a90d8"/>
+  <rect x="9" y="33" width="15" height="9" fill="#5a3818"/>
+  <rect x="24" y="33" width="15" height="9" fill="#5a3818"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-legs">
+  <!-- 牛仔裤 (左腿) -->
+  <rect x="48" y="240" width="48" height="108" fill="#3a70b8"/>
+  <rect x="48" y="240" width="6" height="108" fill="#5a90d8"/>
+  <rect x="90" y="240" width="6" height="108" fill="#1a4080"/>
+  <!-- 牛仔裤 (右腿) -->
+  <rect x="96" y="240" width="48" height="108" fill="#3a70b8"/>
+  <rect x="96" y="240" width="6" height="108" fill="#5a90d8"/>
+  <rect x="138" y="240" width="6" height="108" fill="#1a4080"/>
+  <!-- 牛仔接缝 -->
+  <rect x="68" y="240" width="2" height="108" fill="#1a4080"/>
+  <rect x="120" y="240" width="2" height="108" fill="#1a4080"/>
+  <!-- 棕靴 -->
+  <rect x="48" y="348" width="48" height="24" fill="#5a3818"/>
+  <rect x="96" y="348" width="48" height="24" fill="#5a3818"/>
+  <rect x="48" y="348" width="6" height="24" fill="#7a5828"/>
+  <rect x="96" y="348" width="6" height="24" fill="#7a5828"/>
+</g>`,
+    },
+
+    rainbow_socks: {
+      slot: 'legs', name: '彩虹长袜', price: 100,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="12" y="3" width="9" height="6" fill="#ff4040"/>
+  <rect x="12" y="9" width="9" height="6" fill="#ffa040"/>
+  <rect x="12" y="15" width="9" height="6" fill="#ffd040"/>
+  <rect x="12" y="21" width="9" height="6" fill="#40c060"/>
+  <rect x="12" y="27" width="9" height="6" fill="#4080e0"/>
+  <rect x="27" y="3" width="9" height="6" fill="#ff4040"/>
+  <rect x="27" y="9" width="9" height="6" fill="#ffa040"/>
+  <rect x="27" y="15" width="9" height="6" fill="#ffd040"/>
+  <rect x="27" y="21" width="9" height="6" fill="#40c060"/>
+  <rect x="27" y="27" width="9" height="6" fill="#4080e0"/>
+  <rect x="9" y="33" width="15" height="9" fill="#fff"/>
+  <rect x="24" y="33" width="15" height="9" fill="#fff"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-legs">
+  <!-- 左腿 5 色条纹 -->
+  <rect x="48" y="240" width="48" height="22" fill="#ff4040"/>
+  <rect x="48" y="262" width="48" height="22" fill="#ffa040"/>
+  <rect x="48" y="284" width="48" height="22" fill="#ffd040"/>
+  <rect x="48" y="306" width="48" height="22" fill="#40c060"/>
+  <rect x="48" y="328" width="48" height="20" fill="#4080e0"/>
+  <!-- 右腿 5 色条纹 -->
+  <rect x="96" y="240" width="48" height="22" fill="#ff4040"/>
+  <rect x="96" y="262" width="48" height="22" fill="#ffa040"/>
+  <rect x="96" y="284" width="48" height="22" fill="#ffd040"/>
+  <rect x="96" y="306" width="48" height="22" fill="#40c060"/>
+  <rect x="96" y="328" width="48" height="20" fill="#4080e0"/>
+  <!-- 白色运动鞋 -->
+  <rect x="48" y="348" width="48" height="24" fill="#fff"/>
+  <rect x="96" y="348" width="48" height="24" fill="#fff"/>
+  <rect x="48" y="348" width="48" height="6" fill="#d0d0d0"/>
+  <rect x="96" y="348" width="48" height="6" fill="#d0d0d0"/>
+</g>`,
+    },
+
+    snow_boots: {
+      slot: 'legs', name: '雪地靴', price: 120,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="12" y="3" width="9" height="24" fill="#a8d0e8"/>
+  <rect x="27" y="3" width="9" height="24" fill="#a8d0e8"/>
+  <rect x="9" y="27" width="15" height="15" fill="#fff"/>
+  <rect x="24" y="27" width="15" height="15" fill="#fff"/>
+  <rect x="9" y="27" width="15" height="3" fill="#d0e8f8"/>
+  <rect x="24" y="27" width="15" height="3" fill="#d0e8f8"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-legs">
+  <!-- 蓝色裤 -->
+  <rect x="48" y="240" width="48" height="84" fill="#a8d0e8"/>
+  <rect x="48" y="240" width="6" height="84" fill="#d0e8f8"/>
+  <rect x="90" y="240" width="6" height="84" fill="#7898b0"/>
+  <rect x="96" y="240" width="48" height="84" fill="#a8d0e8"/>
+  <rect x="96" y="240" width="6" height="84" fill="#d0e8f8"/>
+  <rect x="138" y="240" width="6" height="84" fill="#7898b0"/>
+  <!-- 雪地靴(白毛领+靴) -->
+  <rect x="36" y="324" width="60" height="12" fill="#fff"/>
+  <rect x="96" y="324" width="60" height="12" fill="#fff"/>
+  <rect x="48" y="336" width="48" height="36" fill="#fff"/>
+  <rect x="96" y="336" width="48" height="36" fill="#fff"/>
+  <rect x="48" y="336" width="6" height="36" fill="#d0d0d0"/>
+  <rect x="96" y="336" width="6" height="36" fill="#d0d0d0"/>
+</g>`,
+    },
+
+    glass_slippers: {
+      slot: 'legs', name: '玻璃鞋', price: 200,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="12" y="3" width="9" height="24" fill="#fff"/>
+  <rect x="27" y="3" width="9" height="24" fill="#fff"/>
+  <rect x="12" y="3" width="3" height="24" fill="#ffd0e0"/>
+  <rect x="27" y="3" width="3" height="24" fill="#ffd0e0"/>
+  <rect x="9" y="27" width="30" height="6" fill="#ffd0e0"/>
+  <rect x="9" y="33" width="15" height="9" fill="#ff80b0"/>
+  <rect x="24" y="33" width="15" height="9" fill="#ff80b0"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-legs">
+  <!-- 白色长袜 (左腿) -->
+  <rect x="48" y="240" width="48" height="108" fill="#fff"/>
+  <rect x="48" y="240" width="6" height="108" fill="#ffd0e0"/>
+  <rect x="90" y="240" width="6" height="108" fill="#d0a0b0"/>
+  <!-- 白色长袜 (右腿) -->
+  <rect x="96" y="240" width="48" height="108" fill="#fff"/>
+  <rect x="96" y="240" width="6" height="108" fill="#ffd0e0"/>
+  <rect x="138" y="240" width="6" height="108" fill="#d0a0b0"/>
+  <!-- 粉色玻璃鞋 -->
+  <rect x="48" y="348" width="48" height="24" fill="#ff80b0"/>
+  <rect x="96" y="348" width="48" height="24" fill="#ff80b0"/>
+  <rect x="48" y="348" width="48" height="6" fill="#ffb0d0"/>
+  <rect x="96" y="348" width="48" height="6" fill="#ffb0d0"/>
+  <!-- 鞋面亮点 -->
+  <rect x="60" y="354" width="6" height="6" fill="#fff"/>
+  <rect x="108" y="354" width="6" height="6" fill="#fff"/>
+</g>`,
+    },
+
+    knight_legs: {
+      slot: 'legs', name: '骑士护腿', price: 250,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="12" y="3" width="9" height="33" fill="#a0a0c8"/>
+  <rect x="27" y="3" width="9" height="33" fill="#a0a0c8"/>
+  <rect x="12" y="3" width="3" height="33" fill="#d0d0e8"/>
+  <rect x="27" y="3" width="3" height="33" fill="#d0d0e8"/>
+  <rect x="12" y="12" width="9" height="3" fill="#7878a0"/>
+  <rect x="27" y="12" width="9" height="3" fill="#7878a0"/>
+  <rect x="12" y="24" width="9" height="3" fill="#7878a0"/>
+  <rect x="27" y="24" width="9" height="3" fill="#7878a0"/>
+  <rect x="9" y="36" width="15" height="6" fill="#3a3a3a"/>
+  <rect x="24" y="36" width="15" height="6" fill="#3a3a3a"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-legs">
+  <!-- 钢护腿 (左) -->
+  <rect x="48" y="240" width="48" height="108" fill="#a0a0c8"/>
+  <rect x="48" y="240" width="6" height="108" fill="#d0d0e8"/>
+  <rect x="90" y="240" width="6" height="108" fill="#7878a0"/>
+  <!-- 钢护腿 (右) -->
+  <rect x="96" y="240" width="48" height="108" fill="#a0a0c8"/>
+  <rect x="96" y="240" width="6" height="108" fill="#d0d0e8"/>
+  <rect x="138" y="240" width="6" height="108" fill="#7878a0"/>
+  <!-- 关节横纹 (3 道) -->
+  <rect x="48" y="270" width="48" height="6" fill="#7878a0"/>
+  <rect x="96" y="270" width="48" height="6" fill="#7878a0"/>
+  <rect x="48" y="300" width="48" height="6" fill="#7878a0"/>
+  <rect x="96" y="300" width="48" height="6" fill="#7878a0"/>
+  <rect x="48" y="330" width="48" height="6" fill="#7878a0"/>
+  <rect x="96" y="330" width="48" height="6" fill="#7878a0"/>
+  <!-- 黑色靴子 -->
+  <rect x="48" y="348" width="48" height="24" fill="#3a3a3a"/>
+  <rect x="96" y="348" width="48" height="24" fill="#3a3a3a"/>
+  <rect x="48" y="348" width="6" height="24" fill="#5a5a5a"/>
+  <rect x="96" y="348" width="6" height="24" fill="#5a5a5a"/>
+</g>`,
+    },
   };
 })();
