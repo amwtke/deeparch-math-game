@@ -10,7 +10,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from .cosmetics import SLOTS
 
@@ -227,11 +227,14 @@ def set_equipped(slot: str, cosmetic_id: str | None) -> None:
         )
 
 
+BuyErrorReason = Literal["insufficient_coins", "already_owned"]
+
+
 class BuyCosmeticError(Exception):
-    """购买装扮失败。reason: 'insufficient_coins' | 'already_owned'。"""
-    def __init__(self, reason: str):
+    """购买装扮失败。reason 是 wire 接口的稳定契约,不是 db 内部。"""
+    def __init__(self, reason: BuyErrorReason):
         super().__init__(reason)
-        self.reason = reason
+        self.reason: BuyErrorReason = reason
 
 
 def buy_cosmetic(cosmetic_id: str, slot: str, price: int) -> dict[str, Any]:

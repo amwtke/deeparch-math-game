@@ -208,12 +208,12 @@ def equip_cosmetic(payload: EquipCosmeticRequest) -> PlayerState:
     if payload.cosmetic_id is not None:
         meta = COSMETICS.get(payload.cosmetic_id)
         if meta is None:
-            raise HTTPException(400, "Unknown cosmetic")
+            raise HTTPException(400, "unknown_cosmetic")
         if meta["slot"] != payload.slot:
-            raise HTTPException(400, "Cosmetic does not match slot")
+            raise HTTPException(400, "slot_mismatch")
         owned = db.get_player_state()["owned_cosmetics"]
         if payload.cosmetic_id not in owned:
-            raise HTTPException(400, "Cosmetic not owned")
+            raise HTTPException(400, "not_owned")
     db.set_equipped(payload.slot, payload.cosmetic_id)
     return PlayerState(**db.get_player_state())
 
@@ -223,7 +223,7 @@ def buy_cosmetic_endpoint(payload: BuyCosmeticRequest) -> PlayerState:
     """购买装扮。原子扣金币 + 加入 owned + 自动装备。"""
     meta = COSMETICS.get(payload.cosmetic_id)
     if meta is None:
-        raise HTTPException(400, "Unknown cosmetic")
+        raise HTTPException(400, "unknown_cosmetic")
     try:
         new_state = db.buy_cosmetic(payload.cosmetic_id, meta["slot"], meta["price"])
     except db.BuyCosmeticError as e:
