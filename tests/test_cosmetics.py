@@ -258,3 +258,43 @@ def test_equip_invalid_slot_400(client):
     r = client.post("/api/cosmetics/equip",
                     json={"slot": "bad_slot", "cosmetic_id": None})
     assert r.status_code in (400, 422)  # 422 也行 (pydantic)
+
+
+def test_buy_endpoint_success(client):
+    """金币足购买成功 → 返回更新后的 state。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute("UPDATE player_state SET total_coins = 200 WHERE id = 1")
+
+    r = client.post("/api/cosmetics/buy", json={"cosmetic_id": "princess_crown"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_coins"] == 80  # 200 - 120
+    assert "princess_crown" in data["owned_cosmetics"]
+    assert data["equipped_cosmetics"]["head"] == "princess_crown"
+
+
+def test_buy_endpoint_insufficient_coins_400(client):
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute("UPDATE player_state SET total_coins = 50 WHERE id = 1")
+
+    r = client.post("/api/cosmetics/buy", json={"cosmetic_id": "princess_crown"})
+    assert r.status_code == 400
+    assert "insufficient" in r.json()["detail"].lower()
+
+
+def test_buy_endpoint_already_owned_400(client):
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET total_coins = 500, owned_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]',)
+        )
+    r = client.post("/api/cosmetics/buy", json={"cosmetic_id": "princess_crown"})
+    assert r.status_code == 400
+
+
+def test_buy_endpoint_unknown_id_400(client):
+    r = client.post("/api/cosmetics/buy", json={"cosmetic_id": "fake_id"})
+    assert r.status_code == 400

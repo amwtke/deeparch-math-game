@@ -97,3 +97,7 @@ class DecomposeAnswerResult(BaseModel):
 class EquipCosmeticRequest(BaseModel):
     slot: str = Field(..., pattern="^(head|top|hand|legs)$")
     cosmetic_id: str | None = None
+
+
+class BuyCosmeticRequest(BaseModel):
+    cosmetic_id: str

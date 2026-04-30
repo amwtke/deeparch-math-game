@@ -11,7 +11,7 @@ from .cosmetics import COSMETICS
 from .models import (
     AnswerResult, AnswerSubmit, PlayerState, StatsResponse,
     DecomposeAnswerSubmit, DecomposeAnswerResult,
-    EquipCosmeticRequest,
+    EquipCosmeticRequest, BuyCosmeticRequest,
 )
 
 router = APIRouter(prefix="/api")
@@ -216,3 +216,16 @@ def equip_cosmetic(payload: EquipCosmeticRequest) -> PlayerState:
             raise HTTPException(400, "Cosmetic not owned")
     db.set_equipped(payload.slot, payload.cosmetic_id)
     return PlayerState(**db.get_player_state())
+
+
+@router.post("/cosmetics/buy", response_model=PlayerState)
+def buy_cosmetic_endpoint(payload: BuyCosmeticRequest) -> PlayerState:
+    """购买装扮。原子扣金币 + 加入 owned + 自动装备。"""
+    meta = COSMETICS.get(payload.cosmetic_id)
+    if meta is None:
+        raise HTTPException(400, "Unknown cosmetic")
+    try:
+        new_state = db.buy_cosmetic(payload.cosmetic_id, meta["slot"], meta["price"])
+    except db.BuyCosmeticError as e:
+        raise HTTPException(400, e.reason)
+    return PlayerState(**new_state)
