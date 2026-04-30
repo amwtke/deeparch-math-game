@@ -315,7 +315,66 @@
     if (e) e.textContent = composeInput === '' ? '?' : composeInput;
   }
   async function submitComposeAttempt() {
-    // Task 13 实装
+    const result = await submitCurrentAnswer({
+      user_number: parseInt(composeInput, 10),
+    });
+    if (!result) return;
+
+    if (result.correct) {
+      Audio.correct();
+      if (result.new_badges && result.new_badges.length > 0) Audio.levelUp();
+      showCelebration(result, () => nextQuestion());
+    } else {
+      Audio.wrong();
+      // 答错就演示一遍"长条 + 方块 = 数字",看完进下一题
+      composeRevealAnimation(result, () => nextQuestion());
+    }
+  }
+
+  // compose 答错时演示完整合成:长条 + 方块 = 数字
+  function composeRevealAnimation(result, done) {
+    const overlay = el('div', { class: 'ck-celebrate-overlay' });
+    overlay.style.flexDirection = 'column';
+
+    overlay.appendChild(el('div', {
+      style:
+        'font-family:"ZCOOL KuaiLe",sans-serif;font-size:24px;color:white;' +
+        'text-shadow:2px 2px 0 #5D4037;margin-bottom:12px;',
+    }, '看一下:'));
+
+    const tens = result.expected_tens;
+    const ones = result.expected_ones;
+    const num = currentQuestion.number;
+
+    const row = el('div', {
+      style:
+        'display:flex;align-items:center;gap:12px;background:white;padding:16px;' +
+        'border-top:4px solid #FFD54F;border-left:4px solid #FFD54F;' +
+        'border-right:4px solid #FF6F00;border-bottom:4px solid #FF6F00;' +
+        'color:#5D4037;flex-wrap:wrap;justify-content:center;max-width:90vw;',
+    });
+    const tensWrap = el('div', { style: 'display:flex;flex-direction:column;gap:2px;' });
+    for (let i = 0; i < tens; i++) tensWrap.appendChild(R.renderBar('', 10));
+    row.appendChild(tensWrap);
+    row.appendChild(el('span', { style: 'font-size:28px;font-weight:bold;' }, '+'));
+    row.appendChild(R.renderSingles('', ones));
+    row.appendChild(el('span', { style: 'font-size:28px;font-weight:bold;' }, '='));
+    row.appendChild(el('span', {
+      style:
+        'font-family:"Press Start 2P",monospace;font-size:36px;color:#2E7D32;' +
+        'text-shadow:2px 2px 0 #C8E6C9;',
+    }, String(num)));
+    overlay.appendChild(row);
+
+    const btn = el('button', {
+      class: 'ck-celebrate-btn',
+      style: 'margin-top:20px;',
+      onclick: () => { overlay.remove(); if (done) done(); },
+    }, '▶ 我懂了');
+    overlay.appendChild(btn);
+
+    document.body.appendChild(overlay);
+    listenerCleanups.push(() => overlay.remove());
   }
 
   // === decompose 提交 + 反馈逻辑 ===
@@ -383,14 +442,50 @@
     listenerCleanups.push(() => overlay.remove());
   }
 
-  // compose 题屏占位(Task 13 实装真正 UI)
   function renderComposeScreen() {
     const screen = el('div', { class: 'ck-screen' });
     screen.appendChild(el('button', {
       class: 'ck-exit', onclick: () => Platform.exit(),
     }, '🏠 我玩够了'));
-    screen.appendChild(el('div', { class: 'ck-question' },
-      'compose 题(待 Task 13 实装):number=' + currentQuestion.number));
+
+    // 无矿石,直接展示已分解好的物品栏
+    const tens = (currentQuestion.number / 10) | 0;
+    const ones = currentQuestion.number % 10;
+
+    const inv = el('div', { class: 'ck-inventory', style: 'margin-top:24px;' });
+
+    const tensBin = el('div', { class: 'ck-bin' });
+    tensBin.appendChild(el('div', { class: 'ck-bin-label', html:
+      '十位 <span class="ck-bin-count" id="ck-tens-count">× ' + tens + '</span>' +
+      '<span class="sub">(长条)</span>' }));
+    const tensArea = el('div', { class: 'ck-bin-area', id: 'ck-tens-area' });
+    for (let i = 0; i < tens; i++) tensArea.appendChild(R.renderBar('', 10));
+    tensBin.appendChild(tensArea);
+
+    const onesBin = el('div', { class: 'ck-bin' });
+    onesBin.appendChild(el('div', { class: 'ck-bin-label', html:
+      '个位 <span class="ck-bin-count" id="ck-ones-count">× ' + ones + '</span>' +
+      '<span class="sub">(方块)</span>' }));
+    const onesArea = el('div', { class: 'ck-bin-area', id: 'ck-ones-area' });
+    for (let i = 0; i < ones; i++) onesArea.appendChild(makeOneBlock());
+    onesBin.appendChild(onesArea);
+
+    inv.appendChild(tensBin);
+    inv.appendChild(onesBin);
+    screen.appendChild(inv);
+
+    // 题目区:单个填空槽 + 键盘
+    const panel = el('div', { class: 'ck-question' });
+    panel.appendChild(el('div', null, '看!这是数字几?'));
+    const row = el('div', { class: 'ck-input-row' });
+    row.appendChild(el('div', {
+      class: 'ck-input-slot active' + (composeInput === '' ? ' empty' : ''),
+      id: 'ck-compose-display',
+    }, composeInput === '' ? '?' : composeInput));
+    panel.appendChild(row);
+    panel.appendChild(renderKeypad('compose'));
+    screen.appendChild(panel);
+
     return screen;
   }
 
