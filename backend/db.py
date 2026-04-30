@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from .cosmetics import SLOTS
+
 DB_PATH = Path(__file__).parent.parent / "data" / "game.db"
 
 # 所有可能的勋章 key,跟前端 BADGE_DEFS 保持同步
@@ -141,13 +143,8 @@ def get_player_state() -> dict[str, Any]:
         days_played = c.execute("SELECT COUNT(*) FROM daily_log").fetchone()[0]
 
         equipped_raw = json.loads(row["equipped_cosmetics"] or "{}")
-        # 归一化:确保 4 个槽位都存在
-        equipped = {
-            "head": equipped_raw.get("head"),
-            "top":  equipped_raw.get("top"),
-            "hand": equipped_raw.get("hand"),
-            "legs": equipped_raw.get("legs"),
-        }
+        # 归一化:确保所有槽位都存在
+        equipped = {slot: equipped_raw.get(slot) for slot in SLOTS}
 
         return {
             "total_coins": row["total_coins"],

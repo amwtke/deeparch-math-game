@@ -6,31 +6,6 @@
 """
 from __future__ import annotations
 
-import os
-import tempfile
-from pathlib import Path
-
-import pytest
-from fastapi.testclient import TestClient
-
-
-@pytest.fixture
-def client(monkeypatch):
-    """每个测试用临时数据库。"""
-    tmpdir = tempfile.mkdtemp()
-    tmp_db = Path(tmpdir) / "test.db"
-
-    # 替换 DB_PATH
-    from backend import db
-    monkeypatch.setattr(db, "DB_PATH", tmp_db)
-
-    # 重新初始化
-    db.init_db()
-
-    # 导入 app (注意:app 启动时会调 init_db,但用的是替换后的 DB_PATH)
-    from backend.main import app
-    return TestClient(app)
-
 
 def test_initial_state(client):
     r = client.get("/api/state")
