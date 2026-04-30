@@ -227,6 +227,53 @@ def set_equipped(slot: str, cosmetic_id: str | None) -> None:
         )
 
 
+class BuyCosmeticError(Exception):
+    """购买装扮失败。reason: 'insufficient_coins' | 'already_owned'。"""
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+def buy_cosmetic(cosmetic_id: str, slot: str, price: int) -> dict[str, Any]:
+    """原子购买装扮。抛 BuyCosmeticError 表示业务失败。
+
+    成功:扣金币、加入 owned、装备到对应 slot,返回新 player_state。
+    """
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH, isolation_level=None)
+    conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        row = conn.execute(
+            "SELECT total_coins, owned_cosmetics, equipped_cosmetics FROM player_state WHERE id = 1"
+        ).fetchone()
+        owned = json.loads(row["owned_cosmetics"] or "[]")
+        equipped = json.loads(row["equipped_cosmetics"] or "{}")
+
+        if cosmetic_id in owned:
+            conn.execute("ROLLBACK")
+            raise BuyCosmeticError("already_owned")
+        if row["total_coins"] < price:
+            conn.execute("ROLLBACK")
+            raise BuyCosmeticError("insufficient_coins")
+
+        owned.append(cosmetic_id)
+        equipped[slot] = cosmetic_id
+        conn.execute(
+            """UPDATE player_state
+               SET total_coins = total_coins - ?,
+                   owned_cosmetics = ?,
+                   equipped_cosmetics = ?
+               WHERE id = 1""",
+            (price, json.dumps(owned), json.dumps(equipped)),
+        )
+        conn.execute("COMMIT")
+    finally:
+        conn.close()
+
+    return get_player_state()
+
+
 # ============== 答题记录 ==============
 
 def log_answer(

@@ -4,6 +4,8 @@
 """
 from __future__ import annotations
 
+import pytest
+
 
 def test_cosmetics_registry_structure():
     """COSMETICS 白名单结构校验。"""
@@ -110,3 +112,49 @@ def test_set_equipped_clears_slot(client):
     db.set_equipped("head", None)
     state = db.get_player_state()
     assert state["equipped_cosmetics"]["head"] is None
+
+
+def test_buy_cosmetic_success(client):
+    """金币足、未拥有 → 成功扣钱、加入 owned、自动装备。"""
+    from backend import db
+    # 先给玩家放 200 金币
+    with db.get_conn() as conn:
+        conn.execute("UPDATE player_state SET total_coins = 200 WHERE id = 1")
+
+    state = db.buy_cosmetic("princess_crown", "head", 120)
+    assert state is not None
+    assert state["total_coins"] == 80
+    assert "princess_crown" in state["owned_cosmetics"]
+    assert state["equipped_cosmetics"]["head"] == "princess_crown"
+
+
+def test_buy_cosmetic_insufficient_coins_raises(client):
+    """金币不够 → 抛 BuyCosmeticError('insufficient_coins')。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute("UPDATE player_state SET total_coins = 50 WHERE id = 1")
+
+    with pytest.raises(db.BuyCosmeticError) as exc:
+        db.buy_cosmetic("princess_crown", "head", 120)
+    assert exc.value.reason == "insufficient_coins"
+
+    state = db.get_player_state()
+    assert state["total_coins"] == 50
+    assert state["owned_cosmetics"] == []
+
+
+def test_buy_cosmetic_already_owned_raises(client):
+    """已拥有再买 → 抛 BuyCosmeticError('already_owned'),不扣钱。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET total_coins = 500, owned_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]',)
+        )
+
+    with pytest.raises(db.BuyCosmeticError) as exc:
+        db.buy_cosmetic("princess_crown", "head", 120)
+    assert exc.value.reason == "already_owned"
+
+    state = db.get_player_state()
+    assert state["total_coins"] == 500
