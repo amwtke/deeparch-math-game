@@ -61,11 +61,39 @@
     return ore;
   }
 
+  // === 锤子像素图(12×16,Minecraft Mace 风格) ===
+  // 头部 7 行(0-6)是大锤头,中间 1 行(7)过渡,下 9 行(8-15)是手柄。
+  // 字符 → CSS class .ck-px-{char}:
+  //   T=透明  K=描边  N=锤头深  M=锤头中  L=锤头浅  W=高光
+  //   P=手柄浅紫  U=手柄深紫(绕缠纹)
+  const HAMMER_PIXELS = [
+    'TTTKKKKKKKTT',
+    'TTKKWWLLNKKT',
+    'TKKWWLLLNNKK',
+    'KKWWLLLNNMNK',
+    'KWWLLNNNMMNK',
+    'KWLLNNMMMNKK',
+    'KKLNNMMNKKKT',
+    'TKKNMMKKKTTT',
+    'TTKKKKKTTTTT',
+    'TTTTKPPKTTTT',
+    'TTTTKUPKTTTT',
+    'TTTTKPUKTTTT',
+    'TTTTKUPKTTTT',
+    'TTTTKPUKTTTT',
+    'TTTTKUPKTTTT',
+    'TTTTKKKKTTTT',
+  ];
+
   function renderHammer() {
-    // 像素风锤子:头(石) + 柄(木),两个 div 拼出来,不用 emoji。
     const hammer = el('div', { class: 'ck-hammer', id: 'ck-hammer' });
-    hammer.appendChild(el('div', { class: 'ck-hammer-head' }));
-    hammer.appendChild(el('div', { class: 'ck-hammer-handle' }));
+    const grid = el('div', { class: 'ck-hammer-grid' });
+    for (const row of HAMMER_PIXELS) {
+      for (const ch of row) {
+        grid.appendChild(el('div', { class: 'ck-px ck-px-' + ch }));
+      }
+    }
+    hammer.appendChild(grid);
     return hammer;
   }
 

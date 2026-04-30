@@ -104,59 +104,38 @@
   image-rendering: pixelated;
 }
 
-/* === 像素风锤子(div 拼出来,不用 emoji) ===
-   静止时停在矿石右上方,稍微抬起,等待被点击。strike 动画里挥下来再回去。 */
+/* === 像素风锤子(12×16 网格,Minecraft Mace 风格) ===
+   静止竖直,CSS rotate(-32deg) 让它斜挂在矿石右上方;strike 动画绕手柄底端摆下来。 */
 .ck-hammer {
   position: absolute;
-  top: -8px;
-  right: 0;
-  width: 64px;
-  height: 96px;
-  transform-origin: 22px 88px; /* 大致是手柄末端,挥锤围这点转 */
+  top: -16px;
+  right: -8px;
+  width: 72px;          /* 12 cols × 6px */
+  height: 96px;         /* 16 rows × 6px */
+  transform-origin: 36px 90px;  /* 手柄底部中心 */
   transform: rotate(-32deg);
   pointer-events: none;
   image-rendering: pixelated;
 }
-/* 锤头(石头) */
-.ck-hammer-head {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 64px;
-  height: 44px;
-  background:
-    /* 横向阶梯让锤头看起来分层 */
-    linear-gradient(180deg,
-      #E0E0E0 0%, #E0E0E0 25%,
-      #9E9E9E 25%, #9E9E9E 60%,
-      #616161 60%, #616161 100%);
-  border-top: 5px solid #F5F5F5;
-  border-left: 5px solid #F5F5F5;
-  border-right: 5px solid #424242;
-  border-bottom: 5px solid #424242;
-  box-sizing: border-box;
+.ck-hammer-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(16, 1fr);
+  width: 100%;
+  height: 100%;
 }
-/* 锤柄(木头) */
-.ck-hammer-handle {
-  position: absolute;
-  top: 38px;
-  left: 24px;
-  width: 14px;
-  height: 58px;
-  background:
-    linear-gradient(90deg,
-      #8D6E63 0%, #8D6E63 35%,
-      #5D4037 35%, #5D4037 70%,
-      #3E2723 70%, #3E2723 100%);
-  border-top: 3px solid #A1887F;
-  border-left: 3px solid #A1887F;
-  border-right: 3px solid #3E2723;
-  border-bottom: 3px solid #3E2723;
-  box-sizing: border-box;
-}
+/* 透明位 + 锤子专属配色(与矿石 ck-px-* 共用命名,不冲突) */
+.ck-px-T { background: transparent; }
+.ck-px-K { background: #181228; }   /* 最暗的描边 */
+.ck-px-N { background: #2E2845; }   /* 锤头深色面 */
+.ck-px-M { background: #595570; }   /* 锤头中色 */
+.ck-px-L { background: #8C8CA8; }   /* 锤头浅色 */
+.ck-px-W { background: #DDE3FA; }   /* 锤头白色高光 */
+.ck-px-P { background: #B0A4D9; }   /* 手柄浅紫 */
+.ck-px-U { background: #6B5B95; }   /* 手柄深紫(绕缠纹) */
 
 .ck-hammer.strike {
-  animation: ck-hammer-strike 0.25s ease-in-out;
+  animation: ck-hammer-strike 0.28s ease-in-out;
 }
 @keyframes ck-hammer-strike {
   0%   { transform: rotate(-32deg); }
