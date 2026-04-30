@@ -142,11 +142,16 @@ def update_player_state(
     *,
     coins_delta: int = 0,
     correct_delta: int = 0,
-    answered_delta: int = 1,
+    answered_delta: int = 0,
     new_best_combo: int | None = None,
     badges_update: dict[str, bool] | None = None,
 ) -> None:
-    """增量更新玩家状态。"""
+    """增量更新玩家状态。所有 delta 默认 0,调用方必须显式传想增加的字段。
+
+    历史上 answered_delta 默认 1 是个隐患:某次"只为写勋章"的更新如果忘了
+    显式传 answered_delta=0,会被静默多记一次答题。改默认 0 之后,所有
+    delta 一致,需要 +1 时调用方写明。
+    """
     with get_conn() as conn:
         c = conn.cursor()
         if badges_update:

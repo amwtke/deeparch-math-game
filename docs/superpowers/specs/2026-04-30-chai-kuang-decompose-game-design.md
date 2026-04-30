@@ -140,13 +140,16 @@ CREATE TABLE IF NOT EXISTS decompose_answers (
 }
 ```
 
-响应:
+响应(字段沿用 cou-shi `AnswerResult` 的命名风格,共享 `today_done` / `daily_target_reached`):
 ```json
 {
   "correct": true,
+  "expected_tens": 4,
+  "expected_ones": 7,
   "coins_earned": 1,
   "new_badges": ["decompose_streak_5"],
-  "today_progress": { "done": 5, "target": 10 }
+  "today_done": 5,
+  "daily_target_reached": false
 }
 ```
 
