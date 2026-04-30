@@ -53,6 +53,17 @@ const Audio = {
   combo(n) {
     beep(400 + n * 50, 0.08, 'square', 0.08);
   },
+  // 锤击矿石的"咚",低频方波带快速衰减
+  hammer() {
+    beep(140, 0.12, 'square', 0.12);
+    setTimeout(() => beep(90, 0.18, 'sawtooth', 0.08), 30);
+  },
+  // 凑十合成长条的"嗡!",上滑 + 高频铃声
+  merge() {
+    beep(440, 0.08, 'square', 0.08);
+    setTimeout(() => beep(660, 0.08, 'square', 0.08), 60);
+    setTimeout(() => beep(880, 0.18, 'square', 0.1), 120);
+  },
   toggle() {
     muted = !muted;
     return muted;
