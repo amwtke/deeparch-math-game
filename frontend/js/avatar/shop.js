@@ -133,7 +133,7 @@
 
     const buyBtn = el('button', {
       class: 'shop-action-buy' + (canAfford ? '' : ' disabled'),
-      disabled: !canAfford,
+      disabled: canAfford ? null : true,
       onclick: canAfford ? () => doBuy(id) : null,
     }, canAfford ? `购买 💰${c.price}` : `还差 💰${c.price - state.savedCoins}`);
     bar.appendChild(buyBtn);
