@@ -5,7 +5,16 @@
 
 (function () {
   if (!window.Render || !window.Avatar || !window.Cosmetics || !window.Api) {
-    throw new Error('shop.js: required globals missing');
+    console.error('shop.js: required globals missing');
+    window.AvatarShop = {
+      async start(host) {
+        if (host) {
+          host.innerHTML = '<div style="padding:24px;text-align:center">商店加载失败,请刷新页面</div>';
+        }
+      },
+      exit() {},
+    };
+    return;
   }
   const { el } = window.Render;
 

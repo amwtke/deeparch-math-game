@@ -298,3 +298,56 @@ def test_buy_endpoint_already_owned_400(client):
 def test_buy_endpoint_unknown_id_400(client):
     r = client.post("/api/cosmetics/buy", json={"cosmetic_id": "fake_id"})
     assert r.status_code == 400
+
+
+def test_frontend_catalog_matches_backend_cosmetics():
+    """前端 catalog.js 必须和后端 COSMETICS 在 id/slot/price 上完全一致。
+
+    每件装扮在 catalog.js 里的开头格式为:
+        <id>: {
+          slot: '<slot>', name: '<chinese>', price: <num>,
+          renderIcon: ...
+    用正则提取这三个值,然后跟 backend.cosmetics.COSMETICS 比对。
+    """
+    import re
+    from pathlib import Path
+    from backend.cosmetics import COSMETICS
+
+    catalog_path = Path(__file__).parent.parent / "frontend" / "js" / "avatar" / "catalog.js"
+    text = catalog_path.read_text(encoding="utf-8")
+
+    pattern = re.compile(
+        r"\n\s+(\w+):\s*\{\s*\n"
+        r"\s*slot:\s*'(\w+)'\s*,"
+        r"\s*name:\s*'[^']*'\s*,"
+        r"\s*price:\s*(\d+)"
+    )
+    found = {
+        m.group(1): {"slot": m.group(2), "price": int(m.group(3))}
+        for m in pattern.finditer(text)
+    }
+
+    # 同样数量
+    assert len(found) == len(COSMETICS), (
+        f"count mismatch: frontend={len(found)}, backend={len(COSMETICS)}"
+    )
+
+    # 同样的 id 集合
+    only_frontend = set(found) - set(COSMETICS)
+    only_backend = set(COSMETICS) - set(found)
+    assert not only_frontend and not only_backend, (
+        f"id mismatch: only-frontend={only_frontend}, only-backend={only_backend}"
+    )
+
+    # 每个 id 的 slot 和 price 一致
+    mismatches = []
+    for cid in COSMETICS:
+        if found[cid]["slot"] != COSMETICS[cid]["slot"]:
+            mismatches.append(
+                f"{cid} slot: frontend={found[cid]['slot']!r} backend={COSMETICS[cid]['slot']!r}"
+            )
+        if found[cid]["price"] != COSMETICS[cid]["price"]:
+            mismatches.append(
+                f"{cid} price: frontend={found[cid]['price']} backend={COSMETICS[cid]['price']}"
+            )
+    assert not mismatches, "drift:\n  " + "\n  ".join(mismatches)

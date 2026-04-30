@@ -4,7 +4,15 @@
 
 (function () {
   if (!window.Render || !window.Avatar) {
-    throw new Error('home-tile.js: Render and Avatar must load first');
+    console.error('home-tile.js: Render and Avatar must load first');
+    window.AvatarHomeTile = {
+      render(parentEl) {
+        if (parentEl) {
+          parentEl.innerHTML = '<div style="padding:16px;color:#888">角色加载中...</div>';
+        }
+      },
+    };
+    return;
   }
   const { el } = window.Render;
 
