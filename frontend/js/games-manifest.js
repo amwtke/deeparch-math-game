@@ -12,12 +12,12 @@ window.Games = [
     enabled: true,
   },
   {
-    id: 'placeholder-1',
-    name: '敬请期待',
-    icon: '🔒',
-    color: 'gray',
-    module: null,
-    enabled: false,
+    id: 'chai-kuang',
+    name: '矿石分解大师',
+    icon: '🔨',
+    color: 'orange',
+    module: 'ChaiKuang',
+    enabled: true,
   },
   {
     id: 'placeholder-2',
