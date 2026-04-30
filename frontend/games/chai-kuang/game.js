@@ -14,10 +14,14 @@
     return hostElement;
   }
 
-  // 当前题目状态(本 Task 仅用 currentNumber 演示静态画面,
-  // Task 11 起会真正驱动题型与流程)
-  let currentNumber = 47;
-  let oreRemaining = 47;
+  // === 当前题目状态 ===
+  // currentQuestion = { number: 10..99, type: 'observe' | 'decompose' | 'compose' }
+  const QUESTION_TYPES = ['observe', 'decompose', 'compose'];
+  let currentQuestion = null;
+  let questionStartTime = 0;
+  // oreRemaining/tensCount/onesCount 由 nextQuestion 根据 currentQuestion.number 重置。
+  // 保留导出以便 strikeOre/flyCubes/checkAutoMerge 直接读写。
+  let oreRemaining = 0;
   let tensCount = 0;
   let onesCount = 0;
 
@@ -172,7 +176,7 @@
     return cube;
   }
 
-  function renderGameScreen() {
+  function renderStrikeScreen() {
     const screen = el('div', { class: 'ck-screen' });
     screen.appendChild(el('button', {
       class: 'ck-exit', onclick: () => Platform.exit(),
@@ -187,10 +191,99 @@
 
     screen.appendChild(renderInventory());
 
-    // 题目占位区(Task 11 接入)
-    screen.appendChild(el('div', { class: 'ck-question' }, '点矿石试试看!'));
+    screen.appendChild(renderQuestionPanel());
 
     return screen;
+  }
+
+  function renderQuestionPanel() {
+    const panel = el('div', { class: 'ck-question', id: 'ck-question' });
+    if (!currentQuestion) {
+      panel.appendChild(el('div', null, '点矿石试试看!'));
+      return panel;
+    }
+    if (currentQuestion.type === 'observe') {
+      if (oreRemaining > 0) {
+        panel.appendChild(el('div', null,
+          '🔨 把矿石敲完,看看 ' + currentQuestion.number + ' 是怎么组成的'));
+      } else {
+        // observe 完成态:Task 11 接 finalize
+        panel.appendChild(el('div', null, '看!分解完成 ✨'));
+      }
+    } else if (currentQuestion.type === 'decompose') {
+      if (oreRemaining > 0) {
+        panel.appendChild(el('div', null,
+          '🔨 把矿石敲完,然后填出它有几个十、几个一'));
+      } else {
+        // decompose 完成态:Task 12 接输入区
+        panel.appendChild(el('div', null, '敲完啦!Task 12 会在这里加输入框'));
+      }
+    }
+    return panel;
+  }
+
+  // compose 题屏占位(Task 13 实装真正 UI)
+  function renderComposeScreen() {
+    const screen = el('div', { class: 'ck-screen' });
+    screen.appendChild(el('button', {
+      class: 'ck-exit', onclick: () => Platform.exit(),
+    }, '🏠 我玩够了'));
+    screen.appendChild(el('div', { class: 'ck-question' },
+      'compose 题(待 Task 13 实装):number=' + currentQuestion.number));
+    return screen;
+  }
+
+  // ============== 题目流程 ==============
+
+  function generateQuestion() {
+    const number = Math.floor(Math.random() * 90) + 10;  // 10..99
+    const type = QUESTION_TYPES[Math.floor(Math.random() * QUESTION_TYPES.length)];
+    return { number, type };
+  }
+
+  function nextQuestion() {
+    currentQuestion = generateQuestion();
+    questionStartTime = Date.now();
+    // 重置矿石 + 物品栏
+    oreRemaining = currentQuestion.number;
+    tensCount = 0;
+    onesCount = 0;
+    isHammering = false;
+    onOreFinished = null;
+    render();
+  }
+
+  async function submitCurrentAnswer(extra) {
+    if (!currentQuestion) return null;
+    let result;
+    try {
+      result = await Api.submitDecomposeAnswer(Object.assign({
+        number: currentQuestion.number,
+        question_type: currentQuestion.type,
+        elapsed_ms: Date.now() - questionStartTime,
+        user_tens: null,
+        user_ones: null,
+        user_number: null,
+      }, extra || {}));
+    } catch (e) {
+      showToast('存档没成功,再试一次?');
+      return null;
+    }
+    try { await Platform.refreshTopbar(); } catch (e) {}
+    return result;
+  }
+
+  function showToast(text) {
+    const t = el('div', {
+      style:
+        'position:fixed;left:50%;top:30%;transform:translateX(-50%);' +
+        'background:#212121;color:white;padding:10px 18px;border:3px solid #FFD54F;' +
+        'font-family:"ZCOOL KuaiLe",sans-serif;font-size:18px;z-index:1000;',
+    }, text);
+    document.body.appendChild(t);
+    const cleanup = () => t.remove();
+    listenerCleanups.push(cleanup);
+    setTimeout(cleanup, 2200);
   }
 
   // ============== 敲矿核心交互 ==============
@@ -435,15 +528,25 @@
   function render() {
     const app = getHost();
     app.innerHTML = '';
-    app.appendChild(renderGameScreen());
+    if (!currentQuestion) {
+      // 兜底:正常不会走到这里(start 会先 nextQuestion)
+      app.appendChild(renderStrikeScreen());
+      return;
+    }
+    if (currentQuestion.type === 'compose') {
+      app.appendChild(renderComposeScreen());
+    } else {
+      app.appendChild(renderStrikeScreen());
+    }
   }
 
   window.ChaiKuang = {
     start(host) {
       hostElement = host;
-      // 重置游戏状态(无尽模式下 Task 10 起会真正生成新题)
-      currentNumber = 47;
-      oreRemaining = 47;
+      // 重置全部状态;nextQuestion 会再生成第一道题并 render
+      currentQuestion = null;
+      questionStartTime = 0;
+      oreRemaining = 0;
       tensCount = 0;
       onesCount = 0;
       isHammering = false;
@@ -455,7 +558,7 @@
       document.addEventListener('click', unlock, { once: true });
       listenerCleanups.push(() =>
         document.removeEventListener('click', unlock));
-      render();
+      nextQuestion();
     },
     exit() {
       listenerCleanups.forEach(fn => fn());
