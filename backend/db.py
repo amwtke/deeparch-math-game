@@ -276,6 +276,80 @@ def reset_all() -> None:
     with get_conn() as conn:
         c = conn.cursor()
         c.execute("DELETE FROM answers")
+        c.execute("DELETE FROM decompose_answers")
         c.execute("DELETE FROM daily_log")
         c.execute("UPDATE player_state SET total_coins=0, total_correct=0, "
                   "total_answered=0, best_combo=0, badges='{}' WHERE id=1")
+
+
+# ============== 分解游戏 (chai-kuang) ==============
+
+def log_decompose_answer(
+    *,
+    number: int,
+    question_type: str,
+    user_tens: int | None,
+    user_ones: int | None,
+    user_number: int | None,
+    correct: bool,
+    elapsed_ms: int,
+) -> None:
+    """记录分解游戏的一道答题,同时写入共享 daily_log。"""
+    today = today_str()
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute(
+            """INSERT INTO decompose_answers
+               (number, question_type, user_tens, user_ones, user_number,
+                correct, elapsed_ms)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (number, question_type, user_tens, user_ones, user_number,
+             int(correct), elapsed_ms),
+        )
+        c.execute(
+            """INSERT INTO daily_log (date, questions_done, correct_count)
+               VALUES (?, 1, ?)
+               ON CONFLICT(date) DO UPDATE SET
+                 questions_done = questions_done + 1,
+                 correct_count = correct_count + ?""",
+            (today, int(correct), int(correct)),
+        )
+
+
+def get_decompose_total_count() -> int:
+    """累计敲过多少颗矿石(=分解游戏总答题数,无论题型/对错)。"""
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM decompose_answers"
+        ).fetchone()
+    return row["n"]
+
+
+def get_decompose_streak() -> int:
+    """最近一段连续答对的 'decompose' 题型数量(尾部连击)。
+
+    其它题型不打断也不计入(只看 decompose)。
+    """
+    with get_conn() as conn:
+        rows = conn.execute(
+            """SELECT correct FROM decompose_answers
+               WHERE question_type = 'decompose'
+               ORDER BY id DESC"""
+        ).fetchall()
+    streak = 0
+    for r in rows:
+        if r["correct"] == 1:
+            streak += 1
+        else:
+            break
+    return streak
+
+
+def get_compose_correct_count() -> int:
+    """compose 题型累计答对次数。"""
+    with get_conn() as conn:
+        row = conn.execute(
+            """SELECT COUNT(*) AS n FROM decompose_answers
+               WHERE question_type = 'compose' AND correct = 1"""
+        ).fetchone()
+    return row["n"]
