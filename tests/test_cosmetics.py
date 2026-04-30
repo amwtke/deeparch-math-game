@@ -31,3 +31,50 @@ def test_cosmetics_registry_structure():
     prices = [m["price"] for m in COSMETICS.values()]
     assert min(prices) >= 30, "cheapest must be >= 30 coins"
     assert max(prices) <= 400, "most expensive must be <= 400 coins"
+
+
+def test_schema_migration_fresh_db(tmp_path, monkeypatch):
+    """新 db: init_db 后 player_state 含新字段。"""
+    from backend import db as db_mod
+    monkeypatch.setattr(db_mod, "DB_PATH", tmp_path / "fresh.db")
+    db_mod.init_db()
+
+    with db_mod.get_conn() as conn:
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(player_state)")}
+        assert "owned_cosmetics" in cols
+        assert "equipped_cosmetics" in cols
+
+
+def test_schema_migration_legacy_db(tmp_path, monkeypatch):
+    """老 db (无新字段): init_db 自动 ALTER 加上,数据保留。"""
+    import sqlite3
+    legacy_db = tmp_path / "legacy.db"
+    # 模拟老 schema (没有新字段)
+    conn = sqlite3.connect(legacy_db)
+    conn.executescript("""
+        CREATE TABLE player_state (
+            id INTEGER PRIMARY KEY,
+            total_coins INTEGER DEFAULT 0,
+            total_correct INTEGER DEFAULT 0,
+            total_answered INTEGER DEFAULT 0,
+            best_combo INTEGER DEFAULT 0,
+            badges TEXT DEFAULT '{}'
+        );
+        INSERT INTO player_state (id, total_coins) VALUES (1, 99);
+    """)
+    conn.commit()
+    conn.close()
+
+    from backend import db as db_mod
+    monkeypatch.setattr(db_mod, "DB_PATH", legacy_db)
+    db_mod.init_db()
+
+    with db_mod.get_conn() as conn:
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(player_state)")}
+        assert "owned_cosmetics" in cols
+        assert "equipped_cosmetics" in cols
+        # 老数据保留
+        row = conn.execute("SELECT total_coins, owned_cosmetics, equipped_cosmetics FROM player_state WHERE id=1").fetchone()
+        assert row[0] == 99
+        assert row[1] == "[]"
+        assert row[2] == "{}"

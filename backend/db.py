@@ -43,6 +43,19 @@ def get_conn():
         conn.close()
 
 
+def _ensure_player_state_columns(conn: sqlite3.Connection) -> None:
+    """给老的 player_state 表加新字段,幂等。"""
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(player_state)")}
+    if "owned_cosmetics" not in cols:
+        conn.execute(
+            "ALTER TABLE player_state ADD COLUMN owned_cosmetics TEXT DEFAULT '[]'"
+        )
+    if "equipped_cosmetics" not in cols:
+        conn.execute(
+            "ALTER TABLE player_state ADD COLUMN equipped_cosmetics TEXT DEFAULT '{}'"
+        )
+
+
 def init_db() -> None:
     """初始化 schema。幂等,可以重复调用。"""
     with get_conn() as conn:
@@ -95,6 +108,8 @@ def init_db() -> None:
 
         # 确保有玩家记录
         c.execute("INSERT OR IGNORE INTO player_state (id) VALUES (1)")
+
+        _ensure_player_state_columns(conn)
 
 
 def today_str() -> str:
