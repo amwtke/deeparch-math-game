@@ -123,7 +123,8 @@
 
     const tensBin = el('div', { class: 'ck-bin' });
     tensBin.appendChild(el('div', { class: 'ck-bin-label', html:
-      '十位<span class="sub">(长条)</span>' }));
+      '十位 <span class="ck-bin-count" id="ck-tens-count">× ' + tensCount + '</span>' +
+      '<span class="sub">(长条)</span>' }));
     const tensArea = el('div', { class: 'ck-bin-area', id: 'ck-tens-area' });
     for (let i = 0; i < tensCount; i++) {
       tensArea.appendChild(R.renderBar('', 10));
@@ -132,7 +133,8 @@
 
     const onesBin = el('div', { class: 'ck-bin' });
     onesBin.appendChild(el('div', { class: 'ck-bin-label', html:
-      '个位<span class="sub">(方块)</span>' }));
+      '个位 <span class="ck-bin-count" id="ck-ones-count">× ' + onesCount + '</span>' +
+      '<span class="sub">(方块)</span>' }));
     const onesArea = el('div', { class: 'ck-bin-area', id: 'ck-ones-area' });
     for (let i = 0; i < onesCount; i++) {
       onesArea.appendChild(makeOneBlock());
@@ -142,6 +144,25 @@
     inv.appendChild(tensBin);
     inv.appendChild(onesBin);
     return inv;
+  }
+
+  function updateBinCounts() {
+    const tc = document.getElementById('ck-tens-count');
+    if (tc) tc.textContent = '× ' + tensCount;
+    const oc = document.getElementById('ck-ones-count');
+    if (oc) oc.textContent = '× ' + onesCount;
+  }
+
+  // 敲一下在矿石上方浮出 "+N" 像素字,像扣血飘字
+  function spawnDamagePop(amount) {
+    const ore = document.getElementById('ck-ore');
+    if (!ore) return;
+    const r = ore.getBoundingClientRect();
+    const pop = el('div', { class: 'ck-damage-pop' }, '+' + amount);
+    pop.style.left = (r.left + r.width / 2 - 36) + 'px';
+    pop.style.top = (r.top - 8) + 'px';
+    document.body.appendChild(pop);
+    setTimeout(() => pop.remove(), 900);
   }
 
   function makeOneBlock() {
@@ -196,6 +217,9 @@
     const strikeCount = oreRemaining <= FINISH_THRESHOLD
       ? oreRemaining
       : Math.floor(Math.random() * (STRIKE_MAX - STRIKE_MIN + 1)) + STRIKE_MIN;
+
+    // 在矿石上方浮出 "+N" 像素飘字(像扣血)
+    spawnDamagePop(strikeCount);
 
     // 等锤子触底再开始飞方块
     setTimeout(() => {
@@ -261,6 +285,7 @@
         fly.remove();
         onesCount++;
         onesArea.appendChild(makeOneBlock());
+        updateBinCounts();
         arrived++;
         if (arrived === count && done) done();
       }, stagger + FLY_TO_BIN_MS);
@@ -300,6 +325,7 @@
       const startRect = cubes[0].getBoundingClientRect();
       cubes.forEach(c => c.remove());
       onesCount -= 10;
+      updateBinCounts();
 
       const flyBar = R.renderBar('', 10);
       flyBar.classList.add('ck-fly');
@@ -320,6 +346,7 @@
         flyBar.remove();
         tensCount++;
         tensArea.appendChild(R.renderBar('', 10));
+        updateBinCounts();
         // 可能还有 ≥10 个剩,继续递归
         checkAutoMerge(done);
       }, MERGE_FLY_MS);

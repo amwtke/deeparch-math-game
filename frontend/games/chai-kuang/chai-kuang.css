@@ -175,6 +175,15 @@
   font-size: 13px;
   color: #8D6E63;
 }
+/* 实时计数:十位 × N、个位 × N */
+.ck-bin-count {
+  display: inline-block;
+  margin-left: 4px;
+  color: #2E7D32;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  text-shadow: 1px 1px 0 #C8E6C9;
+}
 .ck-bin-area {
   flex: 1;
   display: flex;
@@ -194,6 +203,31 @@
   z-index: 10;
   pointer-events: none;
   transition: transform 0.4s ease-in, opacity 0.4s;
+}
+
+/* 敲一下浮出的 "+N" 像素字(像扣血动画) */
+.ck-damage-pop {
+  position: fixed;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 32px;
+  color: #FFEB3B;
+  text-shadow:
+    3px 3px 0 #5D4037,
+   -2px -2px 0 #5D4037,
+    2px -2px 0 #5D4037,
+   -2px 2px 0 #5D4037,
+    0 0 12px rgba(255, 235, 59, 0.8);
+  pointer-events: none;
+  z-index: 50;
+  animation: ck-damage-pop 0.9s ease-out forwards;
+  image-rendering: pixelated;
+  white-space: nowrap;
+}
+@keyframes ck-damage-pop {
+  0%   { opacity: 0; transform: translateY(0)   scale(0.5); }
+  20%  { opacity: 1; transform: translateY(-10px) scale(1.25); }
+  60%  { opacity: 1; transform: translateY(-50px) scale(1.0); }
+  100% { opacity: 0; transform: translateY(-90px) scale(0.9); }
 }
 
 .ck-merge-glow {
