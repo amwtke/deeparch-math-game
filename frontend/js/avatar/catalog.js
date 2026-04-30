@@ -309,5 +309,129 @@
   <rect x="48" y="216" width="96" height="6" fill="#5098a0"/>
 </g>`,
     },
+
+    flower: {
+      slot: 'hand', name: '鲜花', price: 30,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="21" y="6" width="6" height="6" fill="#ffd700"/>
+  <rect x="15" y="9" width="6" height="6" fill="#ff4080"/>
+  <rect x="27" y="9" width="6" height="6" fill="#ff4080"/>
+  <rect x="15" y="15" width="6" height="6" fill="#ff80b0"/>
+  <rect x="27" y="15" width="6" height="6" fill="#ff80b0"/>
+  <rect x="22" y="18" width="4" height="24" fill="#3a8a3a"/>
+  <rect x="18" y="24" width="4" height="6" fill="#5aa830"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-hand">
+  <!-- 茎(右手向下) -->
+  <rect x="156" y="216" width="4" height="36" fill="#3a8a3a"/>
+  <!-- 叶子 -->
+  <rect x="146" y="228" width="8" height="4" fill="#5aa830"/>
+  <!-- 花朵 (粉) -->
+  <rect x="150" y="198" width="6" height="6" fill="#ff4080"/>
+  <rect x="160" y="198" width="6" height="6" fill="#ff4080"/>
+  <rect x="150" y="204" width="6" height="6" fill="#ff80b0"/>
+  <rect x="160" y="204" width="6" height="6" fill="#ff80b0"/>
+  <rect x="156" y="192" width="4" height="6" fill="#ffd700"/>
+</g>`,
+    },
+
+    apple: {
+      slot: 'hand', name: '苹果', price: 30,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="12" y="15" width="24" height="24" fill="#e03020"/>
+  <rect x="12" y="15" width="6" height="24" fill="#ff5040"/>
+  <rect x="30" y="15" width="6" height="24" fill="#a01010"/>
+  <rect x="22" y="9" width="4" height="9" fill="#3a2010"/>
+  <rect x="26" y="9" width="6" height="3" fill="#5aa830"/>
+  <rect x="18" y="20" width="4" height="4" fill="#ff8060"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-hand">
+  <!-- 苹果 -->
+  <rect x="144" y="222" width="24" height="24" fill="#e03020"/>
+  <rect x="144" y="222" width="6" height="24" fill="#ff5040"/>
+  <rect x="162" y="222" width="6" height="24" fill="#a01010"/>
+  <!-- 茎 -->
+  <rect x="154" y="216" width="4" height="6" fill="#3a2010"/>
+  <!-- 叶子 -->
+  <rect x="158" y="216" width="6" height="3" fill="#5aa830"/>
+  <!-- 高光 -->
+  <rect x="150" y="227" width="4" height="4" fill="#ff8060"/>
+</g>`,
+    },
+
+    diamond_pickaxe: {
+      slot: 'hand', name: '钻石镐', price: 220,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="9" y="6" width="30" height="6" fill="#80e0e8"/>
+  <rect x="9" y="6" width="30" height="3" fill="#b0f0f8"/>
+  <rect x="21" y="12" width="6" height="30" fill="#7a3818"/>
+  <rect x="21" y="12" width="3" height="30" fill="#a05828"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-hand">
+  <!-- 镐头 (横置) -->
+  <rect x="138" y="186" width="42" height="9" fill="#80e0e8"/>
+  <rect x="138" y="186" width="42" height="3" fill="#b0f0f8"/>
+  <!-- 木柄 -->
+  <rect x="156" y="195" width="6" height="60" fill="#7a3818"/>
+  <rect x="156" y="195" width="3" height="60" fill="#a05828"/>
+</g>`,
+    },
+
+    magic_wand: {
+      slot: 'hand', name: '魔法杖', price: 280,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="18" y="3" width="12" height="12" fill="#ff80f0"/>
+  <rect x="18" y="3" width="12" height="3" fill="#ffc0ff"/>
+  <rect x="21" y="6" width="6" height="6" fill="#fff"/>
+  <rect x="22" y="15" width="4" height="27" fill="#a05028"/>
+  <rect x="15" y="6" width="3" height="3" fill="#ffd700"/>
+  <rect x="30" y="6" width="3" height="3" fill="#ffd700"/>
+  <rect x="15" y="12" width="3" height="3" fill="#ffd700"/>
+  <rect x="30" y="12" width="3" height="3" fill="#ffd700"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-hand">
+  <!-- 杖身 -->
+  <rect x="156" y="216" width="4" height="36" fill="#a05028"/>
+  <!-- 杖头水晶 -->
+  <rect x="148" y="186" width="20" height="20" fill="#ff80f0"/>
+  <rect x="148" y="186" width="20" height="6" fill="#ffc0ff"/>
+  <rect x="153" y="190" width="10" height="10" fill="#fff"/>
+  <!-- 闪烁星点 -->
+  <rect x="138" y="192" width="3" height="3" fill="#ffd700"/>
+  <rect x="172" y="192" width="3" height="3" fill="#ffd700"/>
+  <rect x="138" y="204" width="3" height="3" fill="#ffd700"/>
+  <rect x="172" y="204" width="3" height="3" fill="#ffd700"/>
+</g>`,
+    },
+
+    diamond_sword: {
+      slot: 'hand', name: '钻石剑', price: 300,
+      renderIcon: () => `
+<svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <rect x="21" y="3" width="6" height="27" fill="#80e0e8"/>
+  <rect x="21" y="3" width="3" height="27" fill="#b0f0f8"/>
+  <rect x="15" y="30" width="18" height="3" fill="#ffd700"/>
+  <rect x="21" y="33" width="6" height="9" fill="#7a3818"/>
+</svg>`,
+      renderOnAvatar: () => `
+<g class="cm-hand">
+  <!-- 剑刃 -->
+  <rect x="153" y="180" width="9" height="48" fill="#80e0e8"/>
+  <rect x="153" y="180" width="3" height="48" fill="#b0f0f8"/>
+  <!-- 护手 -->
+  <rect x="144" y="228" width="27" height="6" fill="#ffd700"/>
+  <!-- 剑柄 -->
+  <rect x="153" y="234" width="9" height="18" fill="#7a3818"/>
+  <rect x="153" y="234" width="3" height="18" fill="#a05828"/>
+</g>`,
+    },
   };
 })();
