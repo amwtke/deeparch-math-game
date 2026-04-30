@@ -145,15 +145,81 @@
     return bar;
   }
 
-  // event handlers — implemented in Task 16
+  // event handlers
   function onClickItem(id) {
-    console.log('TODO Task 16: onClickItem', id);
+    const c = window.Cosmetics[id];
+    if (!c) return;
+    const owned = state.savedOwned.includes(id);
+    if (owned) {
+      // 直接换装,或取消装备
+      const cur = state.savedEquipped[c.slot];
+      const next = cur === id ? null : id;
+      doEquip(c.slot, next);
+    } else {
+      // 试穿
+      state.previewSlot = c.slot;
+      state.previewCosmeticId = id;
+      rerender();
+    }
   }
-  function doBuy(id) {
-    console.log('TODO Task 16: doBuy', id);
+
+  async function doEquip(slot, cosmeticId) {
+    try {
+      const newState = await window.Api.equipCosmetic(slot, cosmeticId);
+      // 同步本地 + Platform.playerState
+      state.savedEquipped = { ...newState.equipped_cosmetics };
+      state.savedCoins = newState.total_coins;
+      state.savedOwned = [...newState.owned_cosmetics];
+      if (window.Platform) window.Platform.playerState = newState;
+      state.previewSlot = null;
+      state.previewCosmeticId = null;
+      rerender();
+    } catch (e) {
+      console.error('equip failed', e);
+      showToast('Oops 没穿上,再试试');
+    }
   }
+
+  async function doBuy(id) {
+    try {
+      const newState = await window.Api.buyCosmetic(id);
+      state.savedEquipped = { ...newState.equipped_cosmetics };
+      state.savedCoins = newState.total_coins;
+      state.savedOwned = [...newState.owned_cosmetics];
+      if (window.Platform) window.Platform.playerState = newState;
+      state.previewSlot = null;
+      state.previewCosmeticId = null;
+      // 飘字 + 音效
+      flyCoinDeduction(window.Cosmetics[id].price);
+      window.Audio?.levelUp?.();
+      rerender();
+    } catch (e) {
+      console.error('buy failed', e);
+      const msg = String(e.message || '');
+      if (msg.includes('insufficient')) showToast('金币不够');
+      else if (msg.includes('already_owned')) showToast('已经有了');
+      else showToast('Oops 没买上,再试试');
+    }
+  }
+
   function cancelPreview() {
-    console.log('TODO Task 16: cancelPreview');
+    state.previewSlot = null;
+    state.previewCosmeticId = null;
+    rerender();
+  }
+
+  function showToast(msg) {
+    if (!hostEl) return;
+    const t = el('div', { class: 'shop-toast' }, msg);
+    hostEl.appendChild(t);
+    setTimeout(() => { try { hostEl.removeChild(t); } catch {} }, 2400);
+  }
+
+  function flyCoinDeduction(amount) {
+    if (!hostEl) return;
+    const f = el('div', { class: 'shop-coin-fly' }, '-' + amount + ' 💰');
+    hostEl.appendChild(f);
+    setTimeout(() => { try { hostEl.removeChild(f); } catch {} }, 1200);
   }
 
   window.AvatarShop = {
