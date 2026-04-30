@@ -1,0 +1,228 @@
+/* === 主页角色位 === */
+.platform-home.with-avatar {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.platform-avatar-slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 360px;
+}
+.avatar-home-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.avatar-home-tile {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.avatar-home-tile:hover { transform: scale(1.05); }
+.avatar-home-tile .avatar-svg {
+  width: 200px; height: 400px; display: block;
+}
+.avatar-home-hint {
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffd700;
+  padding: 4px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #ffd700;
+  font-family: inherit;
+}
+
+/* === 商店 === */
+.shop-topbar {
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffd700;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-weight: bold;
+  font-family: inherit;
+}
+.shop-back-btn,
+.shop-action-buy,
+.shop-action-cancel {
+  background: #ffd700;
+  color: #5a3a00;
+  border: 2px solid #5a3a00;
+  padding: 6px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+}
+.shop-back-btn:hover,
+.shop-action-buy:hover { background: #fff080; }
+.shop-action-buy.disabled,
+.shop-action-buy:disabled {
+  background: #888;
+  color: #444;
+  cursor: not-allowed;
+}
+.shop-action-cancel { background: #ccc; }
+.shop-title { flex: 1; text-align: center; font-size: 16px; }
+.shop-coins { font-size: 16px; }
+
+.shop-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 50%, #6abe30 50%, #5a9c2a 100%);
+  min-height: calc(100vh - 80px);
+}
+.shop-preview {
+  background: rgba(255, 255, 255, 0.85);
+  border: 3px solid #2a4a1a;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.shop-preview-avatar { position: relative; }
+.shop-preview-avatar .avatar-svg {
+  width: 200px; height: 400px;
+}
+.shop-preview-tag {
+  display: inline-block;
+  margin-top: 8px;
+  background: #ff8000;
+  color: #fff;
+  padding: 4px 12px;
+  font-weight: bold;
+  border: 2px solid #ffd700;
+}
+.shop-summary {
+  margin-top: 12px;
+  width: 100%;
+  background: #fff8e0;
+  border: 2px solid #5a3a00;
+  padding: 8px;
+  font-size: 13px;
+}
+.shop-summary-row { padding: 2px 0; }
+
+.shop-shelves {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.shop-shelf {
+  background: rgba(255, 255, 255, 0.85);
+  border: 3px solid #2a4a1a;
+  padding: 8px 12px;
+}
+.shop-shelf-title {
+  display: inline-block;
+  background: #ffd700;
+  color: #5a3a00;
+  padding: 4px 12px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  border: 2px solid #5a3a00;
+}
+.shop-shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.shop-item {
+  background: #fff;
+  border: 2px solid #5a3a00;
+  padding: 8px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.1s;
+}
+.shop-item:hover { transform: scale(1.04); }
+.shop-item-icon { width: 60px; height: 60px; }
+.shop-item-icon svg { width: 60px; height: 60px; display: block; }
+.shop-item-name { font-size: 11px; color: #5a3a00; line-height: 1.2; }
+.shop-item-price {
+  background: #2a4a1a;
+  color: #ffd700;
+  padding: 2px 6px;
+  font-size: 11px;
+  border: 1px solid #ffd700;
+}
+.shop-item-badge {
+  font-size: 10px;
+  color: #2a6a1a;
+  font-weight: bold;
+}
+.shop-item-owned { background: #c8f0a0; }
+.shop-item-equipped {
+  background: #ffd700;
+  border-color: #5a3a00;
+  border-width: 3px;
+}
+.shop-item-previewing {
+  outline: 3px solid #ff8000;
+  outline-offset: 2px;
+}
+
+.shop-action-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 3px solid #ffd700;
+  z-index: 100;
+}
+.shop-action-name { font-weight: bold; }
+
+.shop-toast {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 20px;
+  font-weight: bold;
+  border: 3px solid #ff8000;
+  z-index: 200;
+}
+.shop-coin-fly {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background: #ffd700;
+  color: #5a3a00;
+  padding: 8px 16px;
+  font-size: 18px;
+  font-weight: bold;
+  border: 3px solid #5a3a00;
+  z-index: 150;
+  animation: coin-fly 1s ease-out;
+  pointer-events: none;
+}
+@keyframes coin-fly {
+  0% { transform: translate(-50%, 0); opacity: 1; }
+  100% { transform: translate(-50%, -120px); opacity: 0; }
+}
+
+/* 让宽度超过 600 时左右排,窄屏改为竖排 */
+@media (max-width: 600px) {
+  .platform-home.with-avatar { grid-template-columns: 1fr; }
+  .shop-body { grid-template-columns: 1fr; }
+  .shop-shelf-grid { grid-template-columns: repeat(3, 1fr); }
+}
