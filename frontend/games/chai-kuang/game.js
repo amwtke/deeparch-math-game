@@ -21,6 +21,19 @@
   let tensCount = 0;
   let onesCount = 0;
 
+  // === 敲矿动画/计时常量 ===
+  const HAMMER_DURATION_MS = 280;     // 锤子 strike 动画总时长(与 CSS 对齐)
+  const HAMMER_HIT_DELAY_MS = 140;    // 锤子触底的瞬间(动画 50%)
+  const FLY_TO_BIN_MS = 380;          // 方块从矿石飞到个位区
+  const MERGE_GLOW_MS = 200;          // 凑十时金光闪
+  const MERGE_FLY_MS = 400;           // 凑十时 10 个方块飞向十位区合体
+  const STRIKE_MIN = 3;
+  const STRIKE_MAX = 5;
+  const FINISH_THRESHOLD = 7;         // 剩余 ≤ 这个值时一锤敲完
+
+  let isHammering = false;
+  let onOreFinished = null;           // 矿石被敲完后的回调(Task 11 注入)
+
   // === 钻石矿纹理 (16×16 像素图案) ===
   // 字符 → CSS class .ck-px-{char}:
   //   1/2/3/4 = 灰石阶梯(暗→亮);A/B/C = 钻石青绿(暗→亮);D = 白色高光
@@ -55,7 +68,7 @@
   function renderOre() {
     // 一整块像素风钻石矿。`oreRemaining` 由 game logic 跟踪,
     // strike 时动态生成飞出的小方块(不再预渲染 N 个 cube)。
-    const ore = el('div', { class: 'ck-ore', id: 'ck-ore' });
+    const ore = el('div', { class: 'ck-ore', id: 'ck-ore', onclick: strikeOre });
     ore.style.setProperty('--cell', oreCellPx(oreRemaining) + 'px');
     const grid = el('div', { class: 'ck-ore-grid' });
     for (const row of ORE_PIXELS) {
@@ -159,6 +172,160 @@
     return screen;
   }
 
+  // ============== 敲矿核心交互 ==============
+
+  function strikeOre() {
+    if (isHammering) return;
+    if (oreRemaining <= 0) return;
+    isHammering = true;
+
+    // 锤子动画 + 矿石抖动 + 音效
+    const hammer = document.getElementById('ck-hammer');
+    if (hammer) {
+      hammer.classList.add('strike');
+      setTimeout(() => hammer.classList.remove('strike'), HAMMER_DURATION_MS);
+    }
+    const ore = document.getElementById('ck-ore');
+    if (ore) {
+      ore.classList.add('shake');
+      setTimeout(() => ore.classList.remove('shake'), 250);
+    }
+    Audio.hammer();
+
+    // 算这一锤敲多少个方块
+    const strikeCount = oreRemaining <= FINISH_THRESHOLD
+      ? oreRemaining
+      : Math.floor(Math.random() * (STRIKE_MAX - STRIKE_MIN + 1)) + STRIKE_MIN;
+
+    // 等锤子触底再开始飞方块
+    setTimeout(() => {
+      flyCubesFromOre(strikeCount, () => {
+        updateOreVisual();
+        checkAutoMerge(() => {
+          isHammering = false;
+          if (oreRemaining <= 0 && onOreFinished) {
+            const cb = onOreFinished;
+            onOreFinished = null;
+            cb();
+          }
+        });
+      });
+    }, HAMMER_HIT_DELAY_MS);
+  }
+
+  // 在矿石内部随机位置生成 count 个 .ck-ore-cube,沿弧线飞到个位区。
+  // 矿石本身没有"内部小方块"DOM,这些 cube 是动态新建的。
+  function flyCubesFromOre(count, done) {
+    const ore = document.getElementById('ck-ore');
+    const onesArea = document.getElementById('ck-ones-area');
+    if (!ore || !onesArea) { oreRemaining -= count; if (done) done(); return; }
+
+    const oreRect = ore.getBoundingClientRect();
+    const targetRect = onesArea.getBoundingClientRect();
+
+    let arrived = 0;
+    if (count === 0) { if (done) done(); return; }
+
+    for (let i = 0; i < count; i++) {
+      // 起点:矿石内部随机一点
+      const sx = oreRect.left + Math.random() * (oreRect.width - 24);
+      const sy = oreRect.top + Math.random() * (oreRect.height - 24);
+
+      const fly = el('div', { class: 'ck-fly ck-ore-cube' });
+      fly.style.position = 'fixed';
+      fly.style.left = sx + 'px';
+      fly.style.top = sy + 'px';
+      document.body.appendChild(fly);
+
+      // 终点:个位区中心,带一点散开
+      const tx = targetRect.left + targetRect.width / 2 - sx
+                 + (Math.random() * 60 - 30);
+      const ty = targetRect.top + targetRect.height / 2 - sy
+                 + (Math.random() * 30 - 15);
+
+      // 错峰起飞,看起来像一连串小爆炸
+      const stagger = i * 30;
+
+      // 计 oreRemaining:此次飞出后剩余
+      oreRemaining--;
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          fly.style.transition =
+            'transform ' + FLY_TO_BIN_MS + 'ms cubic-bezier(.4,.0,.6,1.4)';
+          fly.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+        }, stagger);
+      });
+
+      setTimeout(() => {
+        fly.remove();
+        onesCount++;
+        onesArea.appendChild(makeOneBlock());
+        arrived++;
+        if (arrived === count && done) done();
+      }, stagger + FLY_TO_BIN_MS);
+    }
+  }
+
+  function updateOreVisual() {
+    // 更新数字标签 + 矿石格大小
+    const label = document.getElementById('ck-ore-label');
+    if (label) label.textContent = String(oreRemaining);
+    const ore = document.getElementById('ck-ore');
+    if (ore) {
+      ore.style.setProperty('--cell',
+        oreCellPx(Math.max(oreRemaining, 1)) + 'px');
+      if (oreRemaining <= 0) ore.classList.add('gone');
+    }
+  }
+
+  // 检查个位区有没有 ≥10 个方块,凑足就闪光 + 飞向十位区合体为 1 长条。
+  // 可能连续触发(例如一锤之后个位 12 个 → 合一次还剩 2)。
+  function checkAutoMerge(done) {
+    if (onesCount < 10) { if (done) done(); return; }
+    const onesArea = document.getElementById('ck-ones-area');
+    const tensArea = document.getElementById('ck-tens-area');
+    if (!onesArea || !tensArea) { if (done) done(); return; }
+
+    const cubes = Array.from(onesArea.querySelectorAll('.single-cube')).slice(0, 10);
+    if (cubes.length < 10) { if (done) done(); return; }
+
+    // Step 1: 整组金光闪
+    cubes.forEach(c => c.classList.add('ck-merge-glow'));
+    Audio.merge();
+
+    setTimeout(() => {
+      // Step 2: 把这 10 个移除,飞向十位区,合体为 1 根长条
+      const targetRect = tensArea.getBoundingClientRect();
+      const startRect = cubes[0].getBoundingClientRect();
+      cubes.forEach(c => c.remove());
+      onesCount -= 10;
+
+      const flyBar = R.renderBar('', 10);
+      flyBar.classList.add('ck-fly');
+      flyBar.style.position = 'fixed';
+      flyBar.style.left = startRect.left + 'px';
+      flyBar.style.top = startRect.top + 'px';
+      document.body.appendChild(flyBar);
+
+      const tx = targetRect.left + targetRect.width / 2 - startRect.left - 60;
+      const ty = targetRect.top + targetRect.height / 2 - startRect.top - 16;
+
+      requestAnimationFrame(() => {
+        flyBar.style.transition = 'transform ' + MERGE_FLY_MS + 'ms ease-in-out';
+        flyBar.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+      });
+
+      setTimeout(() => {
+        flyBar.remove();
+        tensCount++;
+        tensArea.appendChild(R.renderBar('', 10));
+        // 可能还有 ≥10 个剩,继续递归
+        checkAutoMerge(done);
+      }, MERGE_FLY_MS);
+    }, MERGE_GLOW_MS);
+  }
+
   function render() {
     const app = getHost();
     app.innerHTML = '';
@@ -168,6 +335,13 @@
   window.ChaiKuang = {
     start(host) {
       hostElement = host;
+      // 重置游戏状态(无尽模式下 Task 10 起会真正生成新题)
+      currentNumber = 47;
+      oreRemaining = 47;
+      tensCount = 0;
+      onesCount = 0;
+      isHammering = false;
+      onOreFinished = null;
       const unlock = () => {
         Audio.unlock();
         document.removeEventListener('click', unlock);
