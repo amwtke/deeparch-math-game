@@ -21,10 +21,41 @@
   let tensCount = 0;
   let onesCount = 0;
 
+  // === 钻石矿纹理 (16×16 像素图案) ===
+  // 字符 → CSS class .ck-px-{char}:
+  //   1/2/3/4 = 灰石阶梯(暗→亮);A/B/C = 钻石青绿(暗→亮);D = 白色高光
+  // 每行严格 16 字符,共 16 行。
+  // 5 个钻石簇分布:上中、右中、左中、右下、下中,加几个零星亮点。
+  const ORE_PIXELS = [
+    '2321234322122312',
+    '3212344432123221',
+    '2231422B21321232',
+    '132231BCB1223212',
+    '2212121B12122132',
+    '3221D21212DB1211',
+    '1231421221BC2112',
+    '21BB212422131213',
+    '31BC421421212121',
+    '124B1221232D2212',
+    '2311212322222231',
+    '1223D212BCC22122',
+    '212441212B222321',
+    '321212BC22212123',
+    '12321BB2212D4212',
+    '2123244312124121',
+  ];
+
   function renderOre() {
-    // 一整块像素风石头方块。`oreRemaining` 由 game logic 跟踪,
+    // 一整块像素风钻石矿。`oreRemaining` 由 game logic 跟踪,
     // strike 时动态生成飞出的小方块(不再预渲染 N 个 cube)。
     const ore = el('div', { class: 'ck-ore', id: 'ck-ore' });
+    const grid = el('div', { class: 'ck-ore-grid' });
+    for (const row of ORE_PIXELS) {
+      for (const ch of row) {
+        grid.appendChild(el('div', { class: 'ck-px ck-px-' + ch }));
+      }
+    }
+    ore.appendChild(grid);
     ore.appendChild(el('div', { class: 'ck-ore-label', id: 'ck-ore-label' },
       String(oreRemaining)));
     return ore;
