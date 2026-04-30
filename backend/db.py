@@ -24,6 +24,9 @@ BADGE_KEYS = [
     "week_warrior",
     "no_hint",
     "speed_demon",
+    "decompose_50",
+    "decompose_streak_5",
+    "compose_perfect_10",
 ]
 
 
@@ -70,6 +73,21 @@ def init_db() -> None:
             questions_done INTEGER DEFAULT 0,
             correct_count INTEGER DEFAULT 0
         );
+
+        CREATE TABLE IF NOT EXISTS decompose_answers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            number INTEGER NOT NULL,
+            question_type TEXT NOT NULL,
+            user_tens INTEGER,
+            user_ones INTEGER,
+            user_number INTEGER,
+            correct INTEGER NOT NULL,
+            elapsed_ms INTEGER,
+            created_at TEXT DEFAULT (datetime('now', 'localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_decompose_created ON decompose_answers(created_at);
+        CREATE INDEX IF NOT EXISTS idx_decompose_type ON decompose_answers(question_type);
 
         CREATE INDEX IF NOT EXISTS idx_answers_created ON answers(created_at);
         CREATE INDEX IF NOT EXISTS idx_answers_correct ON answers(correct);
