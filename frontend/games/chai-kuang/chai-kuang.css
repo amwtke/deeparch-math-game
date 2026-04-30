@@ -423,3 +423,87 @@
 .ck-keypad button:active { transform: translate(2px, 2px); }
 .ck-keypad button.delete { background: #757575; border-color: #BDBDBD #BDBDBD #424242 #424242; }
 .ck-keypad button.submit { background: #2E7D32; border-color: #66BB6A #66BB6A #1B5E20 #1B5E20; }
+
+/* === 胜利/答对弹层(observe / decompose / compose 共用) === */
+.ck-celebrate-overlay {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  animation: ck-celebrate-fade 0.2s ease-out;
+}
+@keyframes ck-celebrate-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ck-celebrate-card {
+  background: #FFA000;
+  border-top: 6px solid #FFD54F;
+  border-left: 6px solid #FFD54F;
+  border-right: 6px solid #FF6F00;
+  border-bottom: 6px solid #FF6F00;
+  padding: 24px 28px;
+  text-align: center;
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  color: white;
+  min-width: 280px;
+  max-width: 90vw;
+  text-shadow: 2px 2px 0 #5D4037;
+  animation: ck-celebrate-pop 0.35s cubic-bezier(.5,1.6,.4,1);
+  image-rendering: pixelated;
+}
+@keyframes ck-celebrate-pop {
+  0%   { transform: scale(0.4); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1.0); }
+}
+.ck-celebrate-emoji {
+  font-size: 56px;
+  line-height: 1;
+}
+.ck-celebrate-eq {
+  font-size: 24px;
+  margin: 12px 0 4px;
+  white-space: nowrap;
+}
+.ck-celebrate-coins {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  color: #FFEB3B;
+  text-shadow: 2px 2px 0 #5D4037;
+  margin: 6px 0 8px;
+}
+.ck-celebrate-badges {
+  background: #FFD54F;
+  color: #5D4037;
+  padding: 8px 12px;
+  margin-top: 8px;
+  text-shadow: none;
+}
+.ck-celebrate-badges-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+.ck-celebrate-badge-name {
+  font-size: 14px;
+  margin-top: 4px;
+  font-family: 'Press Start 2P', monospace;
+}
+.ck-celebrate-btn {
+  margin-top: 16px;
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+  font-size: 22px;
+  padding: 10px 24px;
+  background: #2E7D32;
+  color: white;
+  border-top: 4px solid #66BB6A;
+  border-left: 4px solid #66BB6A;
+  border-right: 4px solid #1B5E20;
+  border-bottom: 4px solid #1B5E20;
+  cursor: pointer;
+  text-shadow: 2px 2px 0 #1B5E20;
+}
+.ck-celebrate-btn:active { transform: translate(2px, 2px); }

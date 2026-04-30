@@ -250,6 +250,11 @@
     onesCount = 0;
     isHammering = false;
     onOreFinished = null;
+    // 按题型挂上"敲完矿石"回调
+    if (currentQuestion.type === 'observe') {
+      onOreFinished = finalizeObserve;
+    }
+    // decompose 在 Task 12 挂;compose 不走敲矿流程
     render();
   }
 
@@ -284,6 +289,52 @@
     const cleanup = () => t.remove();
     listenerCleanups.push(cleanup);
     setTimeout(cleanup, 2200);
+  }
+
+  async function finalizeObserve() {
+    const result = await submitCurrentAnswer({});  // observe 不需要 user_*
+    if (!result) return;
+    Audio.correct();
+    if (result.new_badges && result.new_badges.length > 0) Audio.levelUp();
+    showCelebration(result, () => nextQuestion());
+  }
+
+  // 三种题型答对/完成时共用的胜利浮层。
+  // 显示数字分解 + 金币奖励 + 新勋章(若有) + "▶ 继续"按钮。
+  function showCelebration(result, done) {
+    const tens = (result.expected_tens != null)
+      ? result.expected_tens
+      : ((currentQuestion.number / 10) | 0);
+    const ones = (result.expected_ones != null)
+      ? result.expected_ones
+      : (currentQuestion.number % 10);
+
+    const overlay = el('div', { class: 'ck-celebrate-overlay' });
+    const card = el('div', { class: 'ck-celebrate-card' });
+    card.appendChild(el('div', { class: 'ck-celebrate-emoji' }, '🎉'));
+    card.appendChild(el('div', { class: 'ck-celebrate-eq' },
+      currentQuestion.number + ' = ' + tens + ' 个十 + ' + ones + ' 个一'));
+    card.appendChild(el('div', { class: 'ck-celebrate-coins' },
+      '+' + (result.coins_earned || 0) + ' 💰'));
+
+    if (result.new_badges && result.new_badges.length > 0) {
+      const bRow = el('div', { class: 'ck-celebrate-badges' });
+      bRow.appendChild(el('div', { class: 'ck-celebrate-badges-title' },
+        '🏆 解锁新勋章!'));
+      result.new_badges.forEach(k => {
+        bRow.appendChild(el('div', { class: 'ck-celebrate-badge-name' }, k));
+      });
+      card.appendChild(bRow);
+    }
+
+    const btn = el('button', {
+      class: 'ck-celebrate-btn',
+      onclick: () => { overlay.remove(); if (done) done(); },
+    }, '▶ 继续');
+    card.appendChild(btn);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    listenerCleanups.push(() => overlay.remove());
   }
 
   // ============== 敲矿核心交互 ==============
