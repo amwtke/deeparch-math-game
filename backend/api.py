@@ -204,6 +204,7 @@ def check_decompose_badges(state: dict) -> list[str]:
 
 @router.post("/cosmetics/equip", response_model=PlayerState)
 def equip_cosmetic(payload: EquipCosmeticRequest) -> PlayerState:
+    """装备 / 取下指定槽位的装扮。cosmetic_id=None 表示清空槽位。"""
     if payload.cosmetic_id is not None:
         meta = COSMETICS.get(payload.cosmetic_id)
         if meta is None:
