@@ -45,10 +45,18 @@
     '2123244312124121',
   ];
 
+  // 每个像素格的 px 大小,跟着 oreRemaining 线性变化:
+  // 10 → 11px(矿石 ~176px),99 → 22px(矿石 ~352px)。
+  function oreCellPx(n) {
+    const t = Math.max(0, Math.min(1, (n - 10) / 89));
+    return Math.round(11 + t * 11);
+  }
+
   function renderOre() {
     // 一整块像素风钻石矿。`oreRemaining` 由 game logic 跟踪,
     // strike 时动态生成飞出的小方块(不再预渲染 N 个 cube)。
     const ore = el('div', { class: 'ck-ore', id: 'ck-ore' });
+    ore.style.setProperty('--cell', oreCellPx(oreRemaining) + 'px');
     const grid = el('div', { class: 'ck-ore-grid' });
     for (const row of ORE_PIXELS) {
       for (const ch of row) {

@@ -29,13 +29,15 @@
   min-height: 180px;
 }
 
-/* 钻石矿石(Minecraft 风):16×16 像素网格,JS 在 .ck-ore-grid 里
-   往里塞 256 个 .ck-px-* 小格,每格按图案上色。
+/* 钻石矿石(Minecraft 风):16×16 像素网格,大小由 --cell 变量决定。
+   JS 根据 oreRemaining 设置 --cell:数越大格子越大,矿石整体越大;
+   敲完一锤后 oreRemaining 减小,矿石也跟着缩。
    strike 时动态生成飞出的小方块,DOM 里不预留 N 个 cube。 */
 .ck-ore {
+  --cell: 16px;
   position: relative;
-  width: 256px;
-  height: 256px;
+  width: calc(var(--cell) * 16);
+  height: calc(var(--cell) * 16);
   cursor: pointer;
   user-select: none;
   image-rendering: pixelated;
@@ -44,8 +46,9 @@
   border-right: 6px solid #3A3A3A;
   border-bottom: 6px solid #3A3A3A;
   box-sizing: content-box;
-  transition: transform 0.1s, opacity 0.4s;
-  background: #6E6E6E;  /* fallback */
+  transition: width 0.25s ease, height 0.25s ease,
+              transform 0.1s, opacity 0.4s;
+  background: #6E6E6E;
 }
 .ck-ore-grid {
   display: grid;
@@ -96,9 +99,10 @@
   background: rgba(0, 0, 0, 0.78);
   color: white;
   font-family: 'Press Start 2P', monospace;
-  font-size: 36px;
-  padding: 6px 14px;
-  border: 4px solid #FFD54F;
+  /* 字号 / 内边距 / 边框跟着 --cell 一起放大缩小 */
+  font-size: calc(var(--cell) * 2.25);
+  padding: calc(var(--cell) * 0.4) calc(var(--cell) * 0.9);
+  border: calc(var(--cell) * 0.25) solid #FFD54F;
   text-shadow: 2px 2px 0 #000;
   pointer-events: none;
   image-rendering: pixelated;
