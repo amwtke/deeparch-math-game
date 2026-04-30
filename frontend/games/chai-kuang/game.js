@@ -442,6 +442,108 @@
     listenerCleanups.push(() => overlay.remove());
   }
 
+  // === 教程屏:第一次进游戏时显示一次,用 localStorage 标记 ===
+  const TUTORIAL_KEY = 'chai-kuang-tutorial-seen';
+
+  function tutorialSeen() {
+    try { return localStorage.getItem(TUTORIAL_KEY) === '1'; }
+    catch (e) { return false; }
+  }
+
+  function markTutorialSeen() {
+    try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch (e) {}
+  }
+
+  function renderTutorialScreen() {
+    const screen = el('div', { class: 'ck-screen' });
+
+    screen.appendChild(el('div', {
+      style:
+        'font-family:"Press Start 2P",monospace;font-size:22px;color:white;' +
+        'text-shadow:3px 3px 0 #5D4037;text-align:center;margin:8px 0 16px;' +
+        'letter-spacing:2px;',
+    }, '怎么玩'));
+
+    const wrap = el('div', {
+      style:
+        'background:rgba(255,255,255,0.92);padding:18px;' +
+        'border-top:4px solid #FFD54F;border-left:4px solid #FFD54F;' +
+        'border-right:4px solid #FFA000;border-bottom:4px solid #FFA000;' +
+        'font-family:"ZCOOL KuaiLe",sans-serif;color:#5D4037;' +
+        'max-width:520px;margin:0 auto;',
+    });
+
+    // 1️⃣ 点矿石,锤子来
+    const s1 = el('div', { style: 'margin:8px 0 16px;font-size:17px;line-height:1.5;' });
+    s1.appendChild(el('div', null, '1️⃣ 矿石中央写着数字。点它,像素锤子就来啦!'));
+    wrap.appendChild(s1);
+
+    // 2️⃣ 10 个方块凑齐 → 1 长条
+    const s2 = el('div', { style: 'margin:14px 0;font-size:17px;line-height:1.5;' });
+    s2.appendChild(el('div', null, '2️⃣ 小方块凑齐 10 个,会自动合成 1 根长条!'));
+    const demo = el('div', {
+      style: 'display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center;',
+    });
+    demo.appendChild(R.renderSingles('', 10));
+    demo.appendChild(el('span', {
+      style: 'font-family:"Press Start 2P",monospace;font-size:24px;color:#FFA000;',
+    }, '→'));
+    demo.appendChild(R.renderBar('', 10));
+    s2.appendChild(demo);
+    wrap.appendChild(s2);
+
+    // 3️⃣ 长条 = 10,方块 = 1
+    const s3 = el('div', { style: 'margin:14px 0 8px;font-size:17px;line-height:1.5;' });
+    s3.appendChild(el('div', null,
+      '3️⃣ 长条 = 1 个十,方块 = 1 个一。3 长条 + 5 方块 = 35'));
+    const demo3 = el('div', {
+      style: 'display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center;',
+    });
+    const tens3 = el('div', { style: 'display:flex;flex-direction:column;gap:2px;' });
+    for (let i = 0; i < 3; i++) tens3.appendChild(R.renderBar('', 10));
+    demo3.appendChild(tens3);
+    demo3.appendChild(el('span', {
+      style: 'font-family:"Press Start 2P",monospace;font-size:24px;color:#FFA000;',
+    }, '+'));
+    demo3.appendChild(R.renderSingles('', 5));
+    demo3.appendChild(el('span', {
+      style: 'font-family:"Press Start 2P",monospace;font-size:24px;color:#FFA000;',
+    }, '='));
+    demo3.appendChild(el('span', {
+      style:
+        'font-family:"Press Start 2P",monospace;font-size:32px;color:#2E7D32;' +
+        'text-shadow:2px 2px 0 #C8E6C9;',
+    }, '35'));
+    s3.appendChild(demo3);
+    wrap.appendChild(s3);
+
+    screen.appendChild(wrap);
+
+    const btn = el('button', {
+      style:
+        'margin:20px auto 8px;display:block;' +
+        'font-family:"ZCOOL KuaiLe",sans-serif;font-size:22px;padding:12px 28px;' +
+        'background:#2E7D32;color:white;cursor:pointer;' +
+        'border-top:4px solid #66BB6A;border-left:4px solid #66BB6A;' +
+        'border-right:4px solid #1B5E20;border-bottom:4px solid #1B5E20;' +
+        'text-shadow:2px 2px 0 #1B5E20;',
+      onclick: () => {
+        markTutorialSeen();
+        nextQuestion();
+      },
+    }, '▶ 开始挖矿');
+    screen.appendChild(btn);
+
+    screen.appendChild(el('div', {
+      style: 'text-align:center;margin-top:8px;',
+    }, el('button', {
+      class: 'ck-exit',
+      onclick: () => Platform.exit(),
+    }, '🏠 我玩够了')));
+
+    return screen;
+  }
+
   function renderComposeScreen() {
     const screen = el('div', { class: 'ck-screen' });
     screen.appendChild(el('button', {
@@ -871,7 +973,15 @@
       document.addEventListener('click', unlock, { once: true });
       listenerCleanups.push(() =>
         document.removeEventListener('click', unlock));
-      nextQuestion();
+      if (tutorialSeen()) {
+        nextQuestion();
+      } else {
+        // 第一次进游戏:渲染教程屏,点"开始挖矿"才进真正第一题
+        currentQuestion = null;
+        const app = getHost();
+        app.innerHTML = '';
+        app.appendChild(renderTutorialScreen());
+      }
     },
     exit() {
       listenerCleanups.forEach(fn => fn());
