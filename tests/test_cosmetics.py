@@ -197,3 +197,64 @@ def test_buy_cosmetic_concurrent_double_click(client):
     assert state["total_coins"] == 0
     assert state["owned_cosmetics"] == ["princess_crown"]
     assert state["equipped_cosmetics"]["head"] == "princess_crown"
+
+
+def test_equip_owned_cosmetic(client):
+    """拥有的装扮可以装备到正确槽位。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET owned_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]',)
+        )
+
+    r = client.post("/api/cosmetics/equip",
+                    json={"slot": "head", "cosmetic_id": "princess_crown"})
+    assert r.status_code == 200
+    assert r.json()["equipped_cosmetics"]["head"] == "princess_crown"
+
+
+def test_equip_null_clears_slot(client):
+    """cosmetic_id=None 清空槽位。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET owned_cosmetics = ?, equipped_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]', '{"head": "princess_crown"}')
+        )
+    r = client.post("/api/cosmetics/equip",
+                    json={"slot": "head", "cosmetic_id": None})
+    assert r.status_code == 200
+    assert r.json()["equipped_cosmetics"]["head"] is None
+
+
+def test_equip_unknown_cosmetic_400(client):
+    r = client.post("/api/cosmetics/equip",
+                    json={"slot": "head", "cosmetic_id": "fake_id"})
+    assert r.status_code == 400
+
+
+def test_equip_wrong_slot_400(client):
+    """princess_crown 是 head,不能装到 top。"""
+    from backend import db
+    with db.get_conn() as conn:
+        conn.execute(
+            "UPDATE player_state SET owned_cosmetics = ? WHERE id = 1",
+            ('["princess_crown"]',)
+        )
+    r = client.post("/api/cosmetics/equip",
+                    json={"slot": "top", "cosmetic_id": "princess_crown"})
+    assert r.status_code == 400
+
+
+def test_equip_not_owned_400(client):
+    """没买过的装扮不能装备。"""
+    r = client.post("/api/cosmetics/equip",
+                    json={"slot": "head", "cosmetic_id": "princess_crown"})
+    assert r.status_code == 400
+
+
+def test_equip_invalid_slot_400(client):
+    r = client.post("/api/cosmetics/equip",
+                    json={"slot": "bad_slot", "cosmetic_id": None})
+    assert r.status_code in (400, 422)  # 422 也行 (pydantic)

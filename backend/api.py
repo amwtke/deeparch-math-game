@@ -4,12 +4,14 @@
 """
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from . import db
+from .cosmetics import COSMETICS
 from .models import (
     AnswerResult, AnswerSubmit, PlayerState, StatsResponse,
     DecomposeAnswerSubmit, DecomposeAnswerResult,
+    EquipCosmeticRequest,
 )
 
 router = APIRouter(prefix="/api")
@@ -198,3 +200,18 @@ def check_decompose_badges(state: dict) -> list[str]:
     check("decompose_streak_5", db.get_decompose_streak() >= 5)
     check("compose_perfect_10", db.get_compose_correct_count() >= 10)
     return newly
+
+
+@router.post("/cosmetics/equip", response_model=PlayerState)
+def equip_cosmetic(payload: EquipCosmeticRequest) -> PlayerState:
+    if payload.cosmetic_id is not None:
+        meta = COSMETICS.get(payload.cosmetic_id)
+        if meta is None:
+            raise HTTPException(400, "Unknown cosmetic")
+        if meta["slot"] != payload.slot:
+            raise HTTPException(400, "Cosmetic does not match slot")
+        owned = db.get_player_state()["owned_cosmetics"]
+        if payload.cosmetic_id not in owned:
+            raise HTTPException(400, "Cosmetic not owned")
+    db.set_equipped(payload.slot, payload.cosmetic_id)
+    return PlayerState(**db.get_player_state())

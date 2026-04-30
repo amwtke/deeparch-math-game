@@ -92,3 +92,8 @@ class DecomposeAnswerResult(BaseModel):
     new_badges: list[str]
     today_done: int
     daily_target_reached: bool
+
+
+class EquipCosmeticRequest(BaseModel):
+    slot: str = Field(..., pattern="^(head|top|hand|legs)$")
+    cosmetic_id: str | None = None
