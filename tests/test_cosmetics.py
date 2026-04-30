@@ -158,3 +158,42 @@ def test_buy_cosmetic_already_owned_raises(client):
 
     state = db.get_player_state()
     assert state["total_coins"] == 500
+
+
+def test_buy_cosmetic_concurrent_double_click(client):
+    """两个线程同时买同一件,刚好一份钱:
+    一个成功 (拿到 owned + 扣钱),另一个收 BuyCosmeticError('already_owned')。
+    BEGIN IMMEDIATE 是这个测试唯一能防住的方案。
+    """
+    import threading
+    from backend import db
+
+    with db.get_conn() as conn:
+        conn.execute("UPDATE player_state SET total_coins = 120 WHERE id = 1")
+
+    results: list[tuple[str, object]] = []
+
+    def attempt() -> None:
+        try:
+            r = db.buy_cosmetic("princess_crown", "head", 120)
+            results.append(("ok", r))
+        except db.BuyCosmeticError as e:
+            results.append(("err", e.reason))
+
+    t1 = threading.Thread(target=attempt)
+    t2 = threading.Thread(target=attempt)
+    t1.start(); t2.start(); t1.join(); t2.join()
+
+    oks = [r for r in results if r[0] == "ok"]
+    errs = [r for r in results if r[0] == "err"]
+    assert len(oks) == 1, f"expected exactly 1 success, got {results}"
+    assert len(errs) == 1, f"expected exactly 1 error, got {results}"
+    # 第二个失败:可能是 already_owned (慢线程跑到 owned 检查时第一个已 commit)
+    # 也可能是 insufficient_coins (慢线程跑到 coin 检查时金币已扣到 0)
+    # 两种都是正确的,因为它们都意味着第一个已经成功
+    assert errs[0][1] in ("already_owned", "insufficient_coins")
+
+    state = db.get_player_state()
+    assert state["total_coins"] == 0
+    assert state["owned_cosmetics"] == ["princess_crown"]
+    assert state["equipped_cosmetics"]["head"] == "princess_crown"

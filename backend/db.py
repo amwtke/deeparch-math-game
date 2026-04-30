@@ -240,6 +240,9 @@ def buy_cosmetic(cosmetic_id: str, slot: str, price: int) -> dict[str, Any]:
     成功:扣金币、加入 owned、装备到对应 slot,返回新 player_state。
     """
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    # 这里用裸 sqlite3 而不是 get_conn(),因为我们需要显式 BEGIN IMMEDIATE
+    # 以保证 SELECT-then-UPDATE 的原子性(防双击重复购买)。
+    # get_conn() 在退出时自动 commit,与显式事务管理冲突。
     conn = sqlite3.connect(DB_PATH, isolation_level=None)
     conn.row_factory = sqlite3.Row
     try:
