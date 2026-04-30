@@ -1,3 +1,6 @@
+/* SVG 头饰会画到 viewBox 上方(负 y),关掉默认裁剪 */
+.avatar-svg { overflow: visible; }
+
 /* === 主页角色位 === */
 .platform-home.with-avatar {
   display: grid;
