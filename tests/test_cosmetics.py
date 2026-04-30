@@ -78,3 +78,24 @@ def test_schema_migration_legacy_db(tmp_path, monkeypatch):
         assert row[0] == 99
         assert row[1] == "[]"
         assert row[2] == "{}"
+
+
+@pytest.fixture
+def client(monkeypatch, tmp_path):
+    tmp_db = tmp_path / "test.db"
+    from backend import db
+    monkeypatch.setattr(db, "DB_PATH", tmp_db)
+    db.init_db()
+    from backend.main import app
+    return TestClient(app)
+
+
+def test_state_returns_cosmetics_fields(client):
+    """新建玩家 GET /api/state 返回 owned_cosmetics 和 equipped_cosmetics。"""
+    r = client.get("/api/state")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["owned_cosmetics"] == []
+    assert data["equipped_cosmetics"] == {
+        "head": None, "top": None, "hand": None, "legs": None
+    }

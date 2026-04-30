@@ -39,6 +39,8 @@ class PlayerState(BaseModel):
     today_correct: int
     days_played: int
     today_date: str
+    owned_cosmetics: list[str]
+    equipped_cosmetics: dict[str, str | None]
 
 
 class DailyStat(BaseModel):

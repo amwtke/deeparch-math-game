@@ -140,6 +140,15 @@ def get_player_state() -> dict[str, Any]:
         # 玩了多少天
         days_played = c.execute("SELECT COUNT(*) FROM daily_log").fetchone()[0]
 
+        equipped_raw = json.loads(row["equipped_cosmetics"] or "{}")
+        # 归一化:确保 4 个槽位都存在
+        equipped = {
+            "head": equipped_raw.get("head"),
+            "top":  equipped_raw.get("top"),
+            "hand": equipped_raw.get("hand"),
+            "legs": equipped_raw.get("legs"),
+        }
+
         return {
             "total_coins": row["total_coins"],
             "total_correct": row["total_correct"],
@@ -150,6 +159,8 @@ def get_player_state() -> dict[str, Any]:
             "today_correct": today_correct,
             "days_played": days_played,
             "today_date": today,
+            "owned_cosmetics": json.loads(row["owned_cosmetics"] or "[]"),
+            "equipped_cosmetics": equipped,
         }
 
 
