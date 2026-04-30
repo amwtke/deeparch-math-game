@@ -90,6 +90,7 @@
 }
 
 /* === 游戏挂载点 === */
+.hidden { display: none !important; }
 .platform-screen.hidden { display: none; }
 .game-host {
   flex: 1;

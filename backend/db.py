@@ -378,7 +378,8 @@ def reset_all() -> None:
         c.execute("DELETE FROM decompose_answers")
         c.execute("DELETE FROM daily_log")
         c.execute("UPDATE player_state SET total_coins=0, total_correct=0, "
-                  "total_answered=0, best_combo=0, badges='{}' WHERE id=1")
+                  "total_answered=0, best_combo=0, badges='{}', "
+                  "owned_cosmetics='[]', equipped_cosmetics='{}' WHERE id=1")
 
 
 # ============== 分解游戏 (chai-kuang) ==============

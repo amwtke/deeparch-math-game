@@ -101,6 +101,7 @@
       }
       currentGameId = gameId;
       homeEl.classList.add('hidden');
+      topbarEl.classList.add('hidden');
       gameHostEl.classList.add('active');
       gameHostEl.innerHTML = '';
       mod.start(gameHostEl);
@@ -117,6 +118,7 @@
       }
       currentGameId = '__shop__';
       homeEl.classList.add('hidden');
+      topbarEl.classList.add('hidden');
       gameHostEl.classList.add('active');
       gameHostEl.innerHTML = '';
       window.AvatarShop.start(gameHostEl);
@@ -137,6 +139,7 @@
       gameHostEl.innerHTML = '';
       gameHostEl.classList.remove('active');
       homeEl.classList.remove('hidden');
+      topbarEl.classList.remove('hidden');
       await this.refreshTopbar();
       // 同时把主页角色重新画一遍(装备可能变了)
       renderHome();

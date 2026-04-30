@@ -196,8 +196,12 @@
     } catch (e) {
       console.error('buy failed', e);
       const msg = String(e.message || '');
-      if (msg.includes('insufficient')) showToast('金币不够');
-      else if (msg.includes('already_owned')) showToast('已经有了');
+      if (msg === 'insufficient_coins') showToast('金币不够');
+      else if (msg === 'already_owned') showToast('已经有了');
+      else if (msg === 'unknown_cosmetic') {
+        console.error('catalog drift: front/back disagree on cosmetic id', id);
+        showToast('装扮暂不可用');
+      }
       else showToast('Oops 没买上,再试试');
     }
   }
